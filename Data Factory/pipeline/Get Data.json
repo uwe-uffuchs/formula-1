@@ -90,7 +90,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"fileName": {
-								"value": "@concat(variables('year'), '/', variables('month'), '/',  variables('day'), '/',  variables('time'), '/',  pipeline().parameters.endPoint, '.json')",
+								"value": "@concat(variables('year'), '/', variables('month'), '/',  variables('day'), '/',  variables('time'), '/',  pipeline().parameters.endPoint, '.', variables('fileType'))",
 								"type": "Expression"
 							}
 						}
