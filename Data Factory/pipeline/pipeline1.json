@@ -10,7 +10,7 @@
 				"typeProperties": {
 					"variableName": "Test",
 					"value": {
-						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'yyyy')",
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'mm-ss-tt')",
 						"type": "Expression"
 					}
 				}
