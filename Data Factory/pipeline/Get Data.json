@@ -1,0 +1,20 @@
+{
+	"name": "Get Data",
+	"properties": {
+		"parameters": {
+			"limit": {
+				"type": "string"
+			},
+			"offset": {
+				"type": "string"
+			},
+			"endPoint": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Bronze"
+		},
+		"annotations": []
+	}
+}
