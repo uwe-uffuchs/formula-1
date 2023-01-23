@@ -80,6 +80,7 @@
 						"value": "@variables('endPointsList')",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Set End Point",

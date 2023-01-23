@@ -5,7 +5,32 @@
 			{
 				"name": "Stage Data",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Set Year",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Day",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Time",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -60,12 +85,64 @@
 								"type": "Expression"
 							},
 							"fileName": {
-								"value": "@concat(pipeline().parameters.endPoint, '.json')",
+								"value": "@concat(variables('year'), '/', variables('month'), '/',  variables('day'), '/',  variables('time'), '/',  pipeline().parameters.endPoint, '.json')",
 								"type": "Expression"
 							}
 						}
 					}
 				]
+			},
+			{
+				"name": "Set Year",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "year",
+					"value": {
+						"value": "@convertTimeZone(utcNow(), 'New Zealand Standard Time', 'yyyy')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Month",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "month",
+					"value": {
+						"value": "@convertTimeZone(utcNow(), 'New Zealand Standard Time', 'MMM')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Day",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "day",
+					"value": {
+						"value": "@convertTimeZone(utcNow(), 'New Zealand Standard Time', 'dd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Time",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "time",
+					"value": {
+						"value": "@convertTimeZone(utcNow(), 'New Zealand Standard Time', 'mm-ss')",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -88,6 +165,18 @@
 			"fileType": {
 				"type": "String",
 				"defaultValue": ".json"
+			},
+			"year": {
+				"type": "String"
+			},
+			"month": {
+				"type": "String"
+			},
+			"day": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
 			}
 		},
 		"folder": {
