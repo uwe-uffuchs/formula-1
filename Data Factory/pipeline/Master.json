@@ -96,7 +96,7 @@
 							}
 						},
 						{
-							"name": "Execute Pipeline1",
+							"name": "Get Data",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
