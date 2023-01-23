@@ -29,6 +29,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "Set Total Records",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"policy": {
@@ -47,7 +53,10 @@
 						"requestMethod": "GET",
 						"paginationRules": {
 							"supportRFC5988": "true",
-							"QueryParameters.{offset}": "RANGE:0:10000:30",
+							"QueryParameters.{offset}": {
+								"value": "@concat('RANGE:', variables('offset'), ':', variables('totalRecords'), ':', variables('limit'))",
+								"type": "Expression"
+							},
 							"EndCondition:$.MRData.SeasonTable.Seasons": "Empty"
 						}
 					},
@@ -80,10 +89,6 @@
 						"referenceName": "datalake",
 						"type": "DatasetReference",
 						"parameters": {
-							"container": {
-								"value": "@pipeline().globalParameters.bronze_containername",
-								"type": "Expression"
-							},
 							"fileName": {
 								"value": "@concat(variables('year'), '/', variables('month'), '/',  variables('day'), '/',  variables('time'), '/',  pipeline().parameters.endPoint, '.json')",
 								"type": "Expression"
@@ -143,6 +148,46 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Get First Page",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@{concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, '.', variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))}",
+						"type": "Expression"
+					},
+					"method": "GET"
+				}
+			},
+			{
+				"name": "Set Total Records",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get First Page",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "totalRecords",
+					"value": {
+						"value": "@activity('Get First Page').output.MRData.total",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -176,6 +221,9 @@
 				"type": "String"
 			},
 			"time": {
+				"type": "String"
+			},
+			"totalRecords": {
 				"type": "String"
 			}
 		},
