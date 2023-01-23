@@ -2,9 +2,9 @@
 	"name": "df-formula-1",
 	"properties": {
 		"globalParameters": {
-			"end_point_filename": {
+			"ergast_FullDatasets_filename": {
 				"type": "string",
-				"value": "endPoints.json"
+				"value": "ergast_FullDatasets.json"
 			},
 			"config_containername": {
 				"type": "string",
