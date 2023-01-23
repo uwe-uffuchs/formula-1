@@ -1,0 +1,26 @@
+{
+	"name": "ergast",
+	"properties": {
+		"parameters": {
+			"limit": {
+				"type": "string"
+			},
+			"offset": {
+				"type": "string"
+			},
+			"endPoint": {
+				"type": "string"
+			},
+			"fileType": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "@{concat('https://ergast.com/api/f1/', linkedService().endPoint, '.', linkedService().fileType, '?limit=', linkedService().limit, '&offset=', linkedService().offset)}",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
