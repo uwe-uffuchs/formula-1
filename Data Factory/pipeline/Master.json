@@ -127,10 +127,7 @@
 		],
 		"variables": {
 			"endPointsList": {
-				"type": "Array",
-				"defaultValue": [
-					"Test"
-				]
+				"type": "Array"
 			},
 			"endPoint": {
 				"type": "String"
