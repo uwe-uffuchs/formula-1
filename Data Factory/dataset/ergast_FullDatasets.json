@@ -22,6 +22,9 @@
 			},
 			"endPoint": {
 				"type": "string"
+			},
+			"offset": {
+				"type": "string"
 			}
 		},
 		"annotations": [],

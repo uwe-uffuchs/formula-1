@@ -190,6 +190,148 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "Until End Of API",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "Save Page 1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greaterOrEquals(int(variables('offset')), variables('totalRecords'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Set Previous Offset",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "previousOffset",
+								"value": {
+									"value": "@variables('offset')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Previous Page Number",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "previousPageNo",
+								"value": {
+									"value": "@variables('pageNo')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Stage Data",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Set Offset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set Page Number",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"supportRFC5988": "true"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "ergast_FullDatasets",
+									"type": "DatasetReference",
+									"parameters": {
+										"limit": {
+											"value": "@variables('limit')",
+											"type": "Expression"
+										},
+										"endPoint": {
+											"value": "@pipeline().parameters.endPoint",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Set Offset",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set Previous Offset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "offset",
+								"value": {
+									"value": "@string(add(int(variables('previousOffset')), int(variables('limit'))))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Page Number",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set Previous Page Number",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "pageNo",
+								"value": {
+									"value": "@string(add(int(variables('previousPageNo')), int('1')))",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"timeout": "0.12:00:00"
+				}
 			}
 		],
 		"parameters": {
@@ -229,7 +371,16 @@
 				"defaultValue": "1000"
 			},
 			"pageNo": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "1"
+			},
+			"previousOffset": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"previousPageNo": {
+				"type": "String",
+				"defaultValue": "0"
 			}
 		},
 		"folder": {
