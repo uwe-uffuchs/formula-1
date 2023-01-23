@@ -1,6 +1,133 @@
 {
 	"name": "Master",
 	"properties": {
+		"activities": [
+			{
+				"name": "Get End Points",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "endPoint",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": {
+								"value": "@pipeline().globalParameters.end_point_filename",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Set endPoints Array",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get End Points",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "endPointsList",
+					"value": {
+						"value": "@activity('Get End Points').output.value",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "For Each End Point",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set endPoints Array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('endPointsList')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Set End Point",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "endPoint",
+								"value": {
+									"value": "@item().endPoint",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Get Data",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Set End Point",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Get Data",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"endPoint": {
+										"value": "@variables('endPoint')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"endPointsList": {
+				"type": "Array"
+			},
+			"endPoint": {
+				"type": "String"
+			}
+		},
 		"folder": {
 			"name": "Bronze"
 		},

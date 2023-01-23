@@ -1,15 +1,48 @@
 {
 	"name": "Get Data",
 	"properties": {
+		"activities": [
+			{
+				"name": "Get Data",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))",
+						"type": "Expression"
+					},
+					"method": "GET"
+				}
+			}
+		],
 		"parameters": {
-			"limit": {
-				"type": "string"
-			},
-			"offset": {
-				"type": "string"
-			},
 			"endPoint": {
 				"type": "string"
+			}
+		},
+		"variables": {
+			"limit": {
+				"type": "String",
+				"defaultValue": "30"
+			},
+			"offset": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"total": {
+				"type": "String"
+			},
+			"fileType": {
+				"type": "String",
+				"defaultValue": ".json"
 			}
 		},
 		"folder": {

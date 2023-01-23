@@ -1,0 +1,38 @@
+{
+	"name": "ergastFullDatasets",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ergast",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"limit": {
+					"value": "@dataset().limit",
+					"type": "Expression"
+				},
+				"offset": {
+					"value": "@dataset().offset",
+					"type": "Expression"
+				},
+				"endPoint": {
+					"value": "@dataset().endPoint",
+					"type": "Expression"
+				},
+				"fileType": "json"
+			}
+		},
+		"parameters": {
+			"limit": {
+				"type": "string"
+			},
+			"offset": {
+				"type": "string"
+			},
+			"endPoint": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"schema": []
+	}
+}
