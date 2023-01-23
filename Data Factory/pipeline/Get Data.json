@@ -39,7 +39,14 @@
 				"inputs": [
 					{
 						"referenceName": "ergast_FullDatasets",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"limit": "30",
+							"endPoint": {
+								"value": "@pipeline().parameters.endPoint",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
