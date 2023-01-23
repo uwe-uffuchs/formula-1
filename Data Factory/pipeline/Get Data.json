@@ -154,26 +154,6 @@
 				}
 			},
 			{
-				"name": "Get First Page",
-				"type": "WebActivity",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"url": {
-						"value": "@{concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))}",
-						"type": "Expression"
-					},
-					"method": "GET"
-				}
-			},
-			{
 				"name": "Set Total Records",
 				"type": "SetVariable",
 				"dependsOn": [
@@ -191,6 +171,26 @@
 						"value": "@activity('Get First Page').output.MRData.total",
 						"type": "Expression"
 					}
+				}
+			},
+			{
+				"name": "Get First Page",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, '.', variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))",
+						"type": "Expression"
+					},
+					"method": "GET"
 				}
 			}
 		],
