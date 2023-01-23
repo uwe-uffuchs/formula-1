@@ -54,7 +54,7 @@
 						"paginationRules": {
 							"supportRFC5988": "true",
 							"QueryParameters.{offset}": {
-								"value": "@concat('RANGE:', variables('offset'), ':', variables('totalRecords'), ':', variables('totalRecords'))",
+								"value": "@concat('RANGE:', variables('offset'), ':', variables('totalRecords'), ':', variables('limit'))",
 								"type": "Expression"
 							},
 							"EndCondition:$.MRData.SeasonTable.Seasons": "Empty"
@@ -225,6 +225,10 @@
 			},
 			"totalRecords": {
 				"type": "String"
+			},
+			"limit": {
+				"type": "String",
+				"defaultValue": "1000"
 			}
 		},
 		"folder": {

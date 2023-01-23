@@ -35,7 +35,7 @@
 								"type": "Expression"
 							},
 							"fileName": {
-								"value": "@pipeline().globalParameters.end_point_filename",
+								"value": "@pipeline().globalParameters.ergast_fulldatasets_filename",
 								"type": "Expression"
 							}
 						}
