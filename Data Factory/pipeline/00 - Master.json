@@ -1,5 +1,5 @@
 {
-	"name": "Master",
+	"name": "00 - Master",
 	"properties": {
 		"activities": [
 			{
@@ -109,7 +109,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "Get Full Datasets",
+									"referenceName": "01 - Stage Data",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,

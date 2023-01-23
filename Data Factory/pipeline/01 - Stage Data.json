@@ -1,5 +1,5 @@
 {
-	"name": "Get Full Datasets",
+	"name": "01 - Stage Data",
 	"properties": {
 		"activities": [
 			{
@@ -23,7 +23,7 @@
 				"typeProperties": {
 					"variableName": "month",
 					"value": {
-						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'MMM')",
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'MM')",
 						"type": "Expression"
 					}
 				}
@@ -55,55 +55,9 @@
 				}
 			},
 			{
-				"name": "Set Total Records",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Get First Page",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "totalRecords",
-					"value": {
-						"value": "@activity('Get First Page').output.MRData.total",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "Get First Page",
-				"type": "WebActivity",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"url": {
-						"value": "@concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, '.', variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))",
-						"type": "Expression"
-					},
-					"method": "GET"
-				}
-			},
-			{
 				"name": "Save Page 1",
 				"type": "Copy",
 				"dependsOn": [
-					{
-						"activity": "Set Total Records",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
 					{
 						"activity": "Set Year",
 						"dependencyConditions": [
@@ -272,7 +226,7 @@
 							],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "pageNo",
+								"variableName": "startPageNo",
 								"value": {
 									"value": "@string(add(int(variables('previousPageNo')), int('1')))",
 									"type": "Expression"
@@ -379,6 +333,54 @@
 					],
 					"timeout": "0.12:00:00"
 				}
+			},
+			{
+				"name": "Stage Full Datasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Year",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Day",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Time",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "02 - Stage Full Datasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"directory": {
+							"value": "@concat(pipeline().parameters.endPoint, '/', variables('year'), '-', variables('month'), '-', variables('day'), '/')",
+							"type": "Expression"
+						},
+						"startPageNo": {
+							"value": "@variables('startPageNo')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -410,14 +412,11 @@
 			"time": {
 				"type": "String"
 			},
-			"totalRecords": {
-				"type": "String"
-			},
 			"limit": {
 				"type": "String",
 				"defaultValue": "1000"
 			},
-			"pageNo": {
+			"startPageNo": {
 				"type": "String",
 				"defaultValue": "1"
 			},
