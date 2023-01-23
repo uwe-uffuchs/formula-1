@@ -2,7 +2,7 @@
 	"name": "df-formula-1",
 	"properties": {
 		"globalParameters": {
-			"ergast_FullDatasets_filename": {
+			"ergast_fulldatasets_filename": {
 				"type": "string",
 				"value": "ergast_FullDatasets.json"
 			},
