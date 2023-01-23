@@ -209,7 +209,7 @@
 			},
 			"fileType": {
 				"type": "String",
-				"defaultValue": ".json"
+				"defaultValue": "json"
 			},
 			"year": {
 				"type": "String"
