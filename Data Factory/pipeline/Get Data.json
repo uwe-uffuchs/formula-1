@@ -3,8 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Get Data",
-				"type": "WebActivity",
+				"name": "Stage Data",
+				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -15,12 +15,24 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": {
-						"value": "@concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))",
-						"type": "Expression"
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"supportRFC5988": "true",
+							"QueryParameters.{offset}": "RANGE:0:10000:30"
+						}
 					},
-					"method": "GET"
-				}
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ergast_FullDatasets",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"parameters": {

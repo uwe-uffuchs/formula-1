@@ -27,7 +27,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "endPoint",
+						"referenceName": "datalake",
 						"type": "DatasetReference",
 						"parameters": {
 							"fileName": {
