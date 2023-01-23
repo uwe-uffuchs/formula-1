@@ -5,9 +5,6 @@
 			"limit": {
 				"type": "string"
 			},
-			"offset": {
-				"type": "string"
-			},
 			"endPoint": {
 				"type": "string"
 			},
@@ -18,7 +15,7 @@
 		"annotations": [],
 		"type": "RestService",
 		"typeProperties": {
-			"url": "@{concat('https://ergast.com/api/f1/', linkedService().endPoint, '.', linkedService().fileType, '?limit=', linkedService().limit, '&offset=', linkedService().offset)}",
+			"url": "@{concat('https://ergast.com/api/f1/', linkedService().endPoint, '.', linkedService().fileType, '?limit=', linkedService().limit, '&offset={offset}')}",
 			"enableServerCertificateValidation": true,
 			"authenticationType": "Anonymous"
 		}
