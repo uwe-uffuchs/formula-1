@@ -96,7 +96,7 @@
 							}
 						},
 						{
-							"name": "Get Data",
+							"name": "Get Full Datasets",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
@@ -109,7 +109,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "Get Data",
+									"referenceName": "Get Full Datasets",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
