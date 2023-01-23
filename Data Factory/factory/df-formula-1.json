@@ -1,5 +1,13 @@
 {
 	"name": "df-formula-1",
+	"properties": {
+		"globalParameters": {
+			"end_point_filename": {
+				"type": "string",
+				"value": "endPoints.json"
+			}
+		}
+	},
 	"location": "eastus",
 	"identity": {
 		"type": "SystemAssigned",
