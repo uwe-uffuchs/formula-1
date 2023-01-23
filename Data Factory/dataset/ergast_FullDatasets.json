@@ -13,7 +13,11 @@
 					"value": "@dataset().endPoint",
 					"type": "Expression"
 				},
-				"fileType": "json"
+				"fileType": "json",
+				"offset": {
+					"value": "@dataset().offset",
+					"type": "Expression"
+				}
 			}
 		},
 		"parameters": {

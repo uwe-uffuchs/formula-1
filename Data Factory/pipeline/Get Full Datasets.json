@@ -270,6 +270,15 @@
 										"supportRFC5988": "true"
 									}
 								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
 								"enableStaging": false
 							},
 							"inputs": [
@@ -283,6 +292,26 @@
 										},
 										"endPoint": {
 											"value": "@pipeline().parameters.endPoint",
+											"type": "Expression"
+										},
+										"offset": {
+											"value": "@variables('offset')",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "datalake",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().globalParameters.bronze_containername",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@concat(pipeline().parameters.endPoint, '/', variables('year'), '/', variables('month'), '/', variables('day'), '/', variables('time'), '_', variables('pageNo'), '.', variables('fileType'))",
 											"type": "Expression"
 										}
 									}
