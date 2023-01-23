@@ -17,6 +17,10 @@
 			"silver_containername": {
 				"type": "string",
 				"value": "silver"
+			},
+			"gold_containername": {
+				"type": "string",
+				"value": "gold"
 			}
 		}
 	},
