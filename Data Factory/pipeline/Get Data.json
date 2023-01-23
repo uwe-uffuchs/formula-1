@@ -167,7 +167,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"url": {
-						"value": "@{concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, '.', variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))}",
+						"value": "@{concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))}",
 						"type": "Expression"
 					},
 					"method": "GET"
