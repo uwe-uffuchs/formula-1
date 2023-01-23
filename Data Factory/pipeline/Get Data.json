@@ -89,6 +89,10 @@
 						"referenceName": "datalake",
 						"type": "DatasetReference",
 						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.bronze_containername",
+								"type": "Expression"
+							},
 							"fileName": {
 								"value": "@concat(variables('year'), '/', variables('month'), '/',  variables('day'), '/',  variables('time'), '_',  pipeline().parameters.endPoint, '.', variables('fileType'))",
 								"type": "Expression"
