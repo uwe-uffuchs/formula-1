@@ -3,105 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Stage Data",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "Set Year",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "Set Month",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "Set Day",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "Set Time",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "Set Total Records",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "RestSource",
-						"httpRequestTimeout": "00:01:40",
-						"requestInterval": "00.00:00:00.010",
-						"requestMethod": "GET",
-						"paginationRules": {
-							"supportRFC5988": "true",
-							"QueryParameters.{offset}": {
-								"value": "@concat('RANGE:', variables('offset'), ':', variables('totalRecords'), ':', variables('limit'))",
-								"type": "Expression"
-							},
-							"EndCondition:$.MRData.SeasonTable.Seasons": "Empty"
-						}
-					},
-					"sink": {
-						"type": "JsonSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "JsonWriteSettings"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "ergast_FullDatasets",
-						"type": "DatasetReference",
-						"parameters": {
-							"limit": "30",
-							"endPoint": {
-								"value": "@pipeline().parameters.endPoint",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "datalake",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": {
-								"value": "@pipeline().globalParameters.bronze_containername",
-								"type": "Expression"
-							},
-							"fileName": {
-								"value": "@concat(pipeline().parameters.endPoint, '/', variables('year'), '/', variables('month'), '/',  variables('day'), '/',  variables('time'), '.', variables('fileType'))",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
 				"name": "Set Year",
 				"type": "SetVariable",
 				"dependsOn": [],
@@ -192,6 +93,103 @@
 					},
 					"method": "GET"
 				}
+			},
+			{
+				"name": "Save Page 1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set Total Records",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Year",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Day",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Time",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"supportRFC5988": "true"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ergast_FullDatasets",
+						"type": "DatasetReference",
+						"parameters": {
+							"limit": {
+								"value": "@variables('limit')",
+								"type": "Expression"
+							},
+							"endPoint": {
+								"value": "@pipeline().parameters.endPoint",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "datalake",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.bronze_containername",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@concat(pipeline().parameters.endPoint, '/', variables('year'), '/', variables('month'), '/', variables('day'), '/', variables('time'), '_', variables('pageNo'), '.', variables('fileType'))",
+								"type": "Expression"
+							}
+						}
+					}
+				]
 			}
 		],
 		"parameters": {
@@ -229,6 +227,9 @@
 			"limit": {
 				"type": "String",
 				"defaultValue": "1000"
+			},
+			"pageNo": {
+				"type": "String"
 			}
 		},
 		"folder": {
