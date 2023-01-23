@@ -22,7 +22,8 @@
 						"requestMethod": "GET",
 						"paginationRules": {
 							"supportRFC5988": "true",
-							"QueryParameters.{offset}": "RANGE:0:10000:30"
+							"QueryParameters.{offset}": "RANGE:0:10000:30",
+							"EndCondition:$.MRData.SeasonTable.Seasons": "Empty"
 						}
 					},
 					"sink": {
