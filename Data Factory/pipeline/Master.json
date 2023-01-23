@@ -30,6 +30,10 @@
 						"referenceName": "datalake",
 						"type": "DatasetReference",
 						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.config_containername",
+								"type": "Expression"
+							},
 							"fileName": {
 								"value": "@pipeline().globalParameters.end_point_filename",
 								"type": "Expression"
