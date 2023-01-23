@@ -170,6 +170,10 @@
 							"endPoint": {
 								"value": "@pipeline().parameters.endPoint",
 								"type": "Expression"
+							},
+							"offset": {
+								"value": "@variables('offset')",
+								"type": "Expression"
 							}
 						}
 					}
