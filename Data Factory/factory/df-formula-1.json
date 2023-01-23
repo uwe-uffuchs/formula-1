@@ -9,6 +9,10 @@
 			"config_containername": {
 				"type": "string",
 				"value": "config"
+			},
+			"bronze_containername": {
+				"type": "string",
+				"value": "bronze"
 			}
 		}
 	},
