@@ -96,7 +96,7 @@
 							}
 						},
 						{
-							"name": "Get Data",
+							"name": "Execute Pipeline1",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
@@ -115,7 +115,7 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"endPoint": {
-										"value": "@variables('endPoint')",
+										"value": "@item().endPoint",
 										"type": "Expression"
 									}
 								}
