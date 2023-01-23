@@ -100,7 +100,7 @@
 				"typeProperties": {
 					"variableName": "year",
 					"value": {
-						"value": "@convertTimeZone(utcNow(), 'New Zealand Standard Time', 'yyyy')",
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'yyyy')",
 						"type": "Expression"
 					}
 				}
@@ -113,7 +113,7 @@
 				"typeProperties": {
 					"variableName": "month",
 					"value": {
-						"value": "@convertTimeZone(utcNow(), 'New Zealand Standard Time', 'MMM')",
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'MMM')",
 						"type": "Expression"
 					}
 				}
@@ -126,7 +126,7 @@
 				"typeProperties": {
 					"variableName": "day",
 					"value": {
-						"value": "@convertTimeZone(utcNow(), 'New Zealand Standard Time', 'dd')",
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'dd')",
 						"type": "Expression"
 					}
 				}
@@ -139,7 +139,7 @@
 				"typeProperties": {
 					"variableName": "time",
 					"value": {
-						"value": "@convertTimeZone(utcNow(), 'New Zealand Standard Time', 'mm-ss')",
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'mm-ss-tt')",
 						"type": "Expression"
 					}
 				}
