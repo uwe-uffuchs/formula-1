@@ -315,7 +315,7 @@
 											"type": "Expression"
 										},
 										"fileName": {
-											"value": "@concat(pipeline().parameters.endPoint, '/', variables('year'), '/', variables('month'), '/', variables('day'), '/', variables('time'), '_', variables('pageNo'), '.', variables('fileType'))",
+											"value": "@concat(pipeline().parameters.endPoint, '/', variables('year'), '-', variables('month'), '-', variables('day'), '/', variables('time'), '_', variables('pageNo'), '.', variables('fileType'))",
 											"type": "Expression"
 										}
 									}
