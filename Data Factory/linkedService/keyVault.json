@@ -1,0 +1,10 @@
+{
+	"name": "keyVault",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://kv-formula-1-secrets.vault.azure.net/"
+		}
+	}
+}
