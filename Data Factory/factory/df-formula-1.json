@@ -5,6 +5,10 @@
 			"end_point_filename": {
 				"type": "string",
 				"value": "endPoints.json"
+			},
+			"config_containername": {
+				"type": "string",
+				"value": "config"
 			}
 		}
 	},
