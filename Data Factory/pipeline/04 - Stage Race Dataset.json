@@ -1,9 +1,9 @@
 {
-	"name": "03 - Stage Reliant Datasets",
+	"name": "04 - Stage Race Dataset",
 	"properties": {
 		"activities": [
 			{
-				"name": "Get File Name List",
+				"name": "Get Years",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -35,21 +35,22 @@
 								"type": "Expression"
 							},
 							"fileName": {
-								"value": "@pipeline().parameters.directory",
+								"value": "@pipeline().parameters.fileName",
 								"type": "Expression"
 							}
 						}
-					}
+					},
+					"firstRowOnly": false
 				}
 			}
 		],
 		"parameters": {
-			"directory": {
+			"fileName": {
 				"type": "string"
 			}
 		},
 		"variables": {
-			"fileNames": {
+			"years": {
 				"type": "Array"
 			}
 		},

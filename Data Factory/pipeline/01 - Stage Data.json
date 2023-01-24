@@ -57,40 +57,35 @@
 			{
 				"name": "Stage Reliant Datasets",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Stage Full Datasets",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "03 - Stage Reliant Datasets",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"directory": {
+							"value": "@variables('directory')",
+							"type": "Expression"
+						}
+					}
 				}
 			},
 			{
-				"name": "Execute Pipeline1",
+				"name": "Stage Full Datasets",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Set Month",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "Set Year",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "Set Day",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "Set Time",
+						"activity": "Set Directory",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -105,7 +100,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"directory": {
-							"value": "@concat(pipeline().parameters.endPoint, '/', pipeline().RunId, '/', variables('year'), '-', variables('month'), '/', variables('day'), '/')",
+							"value": "@variables('directory')",
 							"type": "Expression"
 						},
 						"startPageNo": "1",
@@ -118,6 +113,44 @@
 							"value": "@variables('time')",
 							"type": "Expression"
 						}
+					}
+				}
+			},
+			{
+				"name": "Set Directory",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set Time",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Day",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Year",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "directory",
+					"value": {
+						"value": "@concat(pipeline().parameters.endPoint, '/', pipeline().RunId, '/', variables('year'), '-', variables('month'), '/', variables('day'), '/')",
+						"type": "Expression"
 					}
 				}
 			}
@@ -138,6 +171,9 @@
 				"type": "String"
 			},
 			"time": {
+				"type": "String"
+			},
+			"directory": {
 				"type": "String"
 			}
 		},
