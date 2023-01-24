@@ -36,10 +36,291 @@
 				"userProperties": [],
 				"typeProperties": {
 					"url": {
-						"value": "@concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, '.', variables('fileType'), '?limit=', variables('limit'), '&offset=', variables('offset'))",
+						"value": "@concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, '.', pipeline().parameters.fileType, '?limit=', variables('limit'), '&offset=', variables('offset'))",
 						"type": "Expression"
 					},
 					"method": "GET"
+				}
+			},
+			{
+				"name": "Set Page Number",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pageNo",
+					"value": {
+						"value": "@pipeline().parameters.startPageNo",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Save Page 1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set Page Number",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Total Records",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"supportRFC5988": "true"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ergast_FullDatasets",
+						"type": "DatasetReference",
+						"parameters": {
+							"limit": {
+								"value": "@variables('limit')",
+								"type": "Expression"
+							},
+							"endPoint": {
+								"value": "@pipeline().parameters.endPoint",
+								"type": "Expression"
+							},
+							"offset": {
+								"value": "@variables('offset')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "datalake",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.bronze_containername",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@concat(pipeline().parameters.directory, '/', pipeline().parameters.time, '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Until End Of API",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "Save Page 1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greaterOrEquals(add(int(variables('prevOffset')), int(variables('limit'))), int(variables('totalRecords')))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Set Previous Offset",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "prevOffset",
+								"value": {
+									"value": "@variables('offset')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Previous Page Number",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "prevPageNo",
+								"value": {
+									"value": "@variables('pageNo')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Update Offset",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set Previous Offset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "offset",
+								"value": {
+									"value": "@string(add(int(variables('prevOffset')), int(variables('limit'))))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Update Page Number",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set Previous Page Number",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "pageNo",
+								"value": {
+									"value": "@string(add(int(variables('prevPageNo')), int('1')))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "If Not End Of API",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Update Offset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Update Page Number",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@less(int(variables('offset')), int(variables('totalRecords')))",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Stage Data",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "RestSource",
+												"httpRequestTimeout": "00:01:40",
+												"requestInterval": "00.00:00:00.010",
+												"requestMethod": "GET",
+												"paginationRules": {
+													"supportRFC5988": "true"
+												}
+											},
+											"sink": {
+												"type": "JsonSink",
+												"storeSettings": {
+													"type": "AzureBlobFSWriteSettings"
+												},
+												"formatSettings": {
+													"type": "JsonWriteSettings"
+												}
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "ergast_FullDatasets",
+												"type": "DatasetReference",
+												"parameters": {
+													"limit": {
+														"value": "@variables('limit')",
+														"type": "Expression"
+													},
+													"endPoint": {
+														"value": "@pipeline().parameters.endPoint",
+														"type": "Expression"
+													},
+													"offset": {
+														"value": "@variables('offset')",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "datalake",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": {
+														"value": "@pipeline().globalParameters.bronze_containername",
+														"type": "Expression"
+													},
+													"fileName": {
+														"value": "@concat(pipeline().parameters.directory, pipeline().parameters.time, '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								]
+							}
+						}
+					],
+					"timeout": "0.12:00:00"
 				}
 			}
 		],
@@ -48,6 +329,15 @@
 				"type": "string"
 			},
 			"startPageNo": {
+				"type": "string"
+			},
+			"endPoint": {
+				"type": "string"
+			},
+			"fileType": {
+				"type": "string"
+			},
+			"time": {
 				"type": "string"
 			}
 		},
@@ -59,6 +349,21 @@
 				"type": "String"
 			},
 			"directory": {
+				"type": "String"
+			},
+			"limit": {
+				"type": "String"
+			},
+			"prevOffset": {
+				"type": "String"
+			},
+			"prevPageNo": {
+				"type": "String"
+			},
+			"offset": {
+				"type": "String"
+			},
+			"totalRecords": {
 				"type": "String"
 			}
 		},
