@@ -35,7 +35,7 @@
 								"type": "Expression"
 							},
 							"fileName": {
-								"value": "@concat(pipeline().parameters.directory, '/', pipeline().parameters.filename)",
+								"value": "@concat(pipeline().parameters.seasonsDirectory, '/', pipeline().parameters.seasonsFilename)",
 								"type": "Expression"
 							}
 						}
