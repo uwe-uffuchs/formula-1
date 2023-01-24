@@ -92,7 +92,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"directory": {
-							"value": "@concat(pipeline().parameters.endPoint, '/', variables('year'), '-', variables('month'), '-', variables('day'), '/')",
+							"value": "@concat(pipeline().parameters.endPoint, '/', pipeline().RunId, '/', variables('year'), '-', variables('month'), '-', variables('day'), '/')",
 							"type": "Expression"
 						},
 						"startPageNo": {
