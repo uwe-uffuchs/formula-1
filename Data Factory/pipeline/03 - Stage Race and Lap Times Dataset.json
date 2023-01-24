@@ -188,7 +188,17 @@
 														"referenceName": "04 - Stage Laps Dataset",
 														"type": "PipelineReference"
 													},
-													"waitOnCompletion": true
+													"waitOnCompletion": true,
+													"parameters": {
+														"seasonsDirectory": {
+															"value": "@pipeline().parameters.seasonsDirectory",
+															"type": "Expression"
+														},
+														"year": {
+															"value": "@item().season",
+															"type": "Expression"
+														}
+													}
 												}
 											}
 										]
@@ -221,6 +231,9 @@
 				"type": "string"
 			},
 			"datasetName": {
+				"type": "string"
+			},
+			"time": {
 				"type": "string"
 			}
 		},

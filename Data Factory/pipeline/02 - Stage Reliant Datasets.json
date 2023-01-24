@@ -123,6 +123,9 @@
 		"parameters": {
 			"seasonsDirectory": {
 				"type": "string"
+			},
+			"time": {
+				"type": "string"
 			}
 		},
 		"folder": {
