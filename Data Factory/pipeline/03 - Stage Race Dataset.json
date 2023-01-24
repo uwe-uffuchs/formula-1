@@ -97,7 +97,16 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": [],
+							"userProperties": [
+								{
+									"name": "Destination",
+									"value": "@{pipeline().globalParameters.bronze_containername}//@{concat(variables('destinationDirectory'), item().season, '_1.json')}"
+								},
+								{
+									"name": "Year",
+									"value": "@item().season"
+								}
+							],
 							"typeProperties": {
 								"source": {
 									"type": "RestSource",
@@ -169,12 +178,10 @@
 		],
 		"parameters": {
 			"seasonsFilename": {
-				"type": "string",
-				"defaultValue": "_1.json"
+				"type": "string"
 			},
 			"seasonsDirectory": {
-				"type": "string",
-				"defaultValue": "7f716b74-18ca-4245-a147-2f2496321d6f/seasons/20230124_040043"
+				"type": "string"
 			}
 		},
 		"variables": {
