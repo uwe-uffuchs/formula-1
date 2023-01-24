@@ -58,6 +58,7 @@
 						"value": "@activity('Get File Name List').output.childItems",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "03 - Stage Race Dataset",
@@ -69,13 +70,7 @@
 									"referenceName": "03 - Stage Race Dataset",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"time": {
-										"value": "@pipeline().parameters.time",
-										"type": "Expression"
-									}
-								}
+								"waitOnCompletion": true
 							}
 						}
 					]
@@ -84,9 +79,6 @@
 		],
 		"parameters": {
 			"directory": {
-				"type": "string"
-			},
-			"time": {
 				"type": "string"
 			}
 		},

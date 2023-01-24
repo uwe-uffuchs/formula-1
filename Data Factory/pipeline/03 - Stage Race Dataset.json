@@ -126,7 +126,7 @@
 									"parameters": {
 										"limit": "1000",
 										"endPoint": {
-											"value": "@item().year",
+											"value": "@item().season",
 											"type": "Expression"
 										},
 										"offset": "0"
@@ -143,7 +143,7 @@
 											"type": "Expression"
 										},
 										"fileName": {
-											"value": "@concat(variables('destinationDirectory'), pipeline().parameters.time, '_1.json')",
+											"value": "@concat(variables('destinationDirectory'), item().season, '_1.json')",
 											"type": "Expression"
 										}
 									}
@@ -175,9 +175,6 @@
 			"seasonsDirectory": {
 				"type": "string",
 				"defaultValue": "7f716b74-18ca-4245-a147-2f2496321d6f/seasons/20230124_040043"
-			},
-			"time": {
-				"type": "string"
 			}
 		},
 		"variables": {
