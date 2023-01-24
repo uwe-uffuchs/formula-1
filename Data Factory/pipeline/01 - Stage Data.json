@@ -55,17 +55,30 @@
 				}
 			},
 			{
-				"name": "Stage Full Datasets",
+				"name": "Stage Reliant Datasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "03 - Stage Reliant Datasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Pipeline1",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Set Year",
+						"activity": "Set Month",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "Set Month",
+						"activity": "Set Year",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -92,19 +105,17 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"directory": {
-							"value": "@concat(pipeline().parameters.endPoint, '/', pipeline().RunId, '/', variables('year'), '-', variables('month'), '-', variables('day'), '/')",
+							"value": "@concat(pipeline().parameters.endPoint, '/', pipeline().RunId, '/', variables('year'), '-', variables('month'), '/', variables('day'), '/')",
 							"type": "Expression"
 						},
-						"startPageNo": {
-							"value": "1",
-							"type": "Expression"
-						},
+						"startPageNo": "1",
 						"endPoint": {
 							"value": "@pipeline().parameters.endPoint",
 							"type": "Expression"
 						},
-						"fileType": {
-							"value": "json",
+						"fileType": "json",
+						"time": {
+							"value": "@variables('time')",
 							"type": "Expression"
 						}
 					}

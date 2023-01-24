@@ -1,0 +1,9 @@
+{
+	"name": "03 - Stage Reliant Datasets",
+	"properties": {
+		"folder": {
+			"name": "Bronze"
+		},
+		"annotations": []
+	}
+}
