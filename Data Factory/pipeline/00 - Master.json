@@ -61,7 +61,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"directory": {
-							"value": "@variables('directory')",
+							"value": "@concat(pipeline().RunId, '/seasons/', variables('year'), variables('month'), variables('day'), '_', variables('time'), '/')",
 							"type": "Expression"
 						}
 					}
@@ -105,7 +105,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "datalake",
+						"referenceName": "datalake_file",
 						"type": "DatasetReference",
 						"parameters": {
 							"container": {

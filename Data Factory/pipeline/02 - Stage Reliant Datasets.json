@@ -4,7 +4,7 @@
 		"activities": [
 			{
 				"name": "Get File Name List",
-				"type": "Lookup",
+				"type": "GetMetadata",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -15,42 +15,80 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "JsonSource",
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "JsonReadSettings"
-						}
-					},
 					"dataset": {
-						"referenceName": "datalake",
+						"referenceName": "datalake_directory",
 						"type": "DatasetReference",
 						"parameters": {
 							"container": {
 								"value": "@pipeline().globalParameters.bronze_containername",
 								"type": "Expression"
 							},
-							"fileName": {
+							"directory": {
 								"value": "@pipeline().parameters.directory",
 								"type": "Expression"
 							}
 						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
 					}
+				}
+			},
+			{
+				"name": "For Each File",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get File Name List",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get File Name List').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "03 - Stage Race Dataset",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "03 - Stage Race Dataset",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"filename": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"directory": {
+										"value": "@pipeline().parameters.directory",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
 				}
 			}
 		],
 		"parameters": {
 			"directory": {
 				"type": "string"
-			}
-		},
-		"variables": {
-			"fileNames": {
-				"type": "Array"
 			}
 		},
 		"folder": {

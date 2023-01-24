@@ -128,7 +128,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "datalake",
+						"referenceName": "datalake_file",
 						"type": "DatasetReference",
 						"parameters": {
 							"container": {
@@ -306,7 +306,7 @@
 										],
 										"outputs": [
 											{
-												"referenceName": "datalake",
+												"referenceName": "datalake_file",
 												"type": "DatasetReference",
 												"parameters": {
 													"container": {

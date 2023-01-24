@@ -1,5 +1,5 @@
 {
-	"name": "datalake_file",
+	"name": "datalake_directory",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "dataLake",
@@ -9,7 +9,7 @@
 			"container": {
 				"type": "string"
 			},
-			"fileName": {
+			"directory": {
 				"type": "string"
 			}
 		},
@@ -18,8 +18,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().fileName",
+				"folderPath": {
+					"value": "@dataset().directory",
 					"type": "Expression"
 				},
 				"fileSystem": {

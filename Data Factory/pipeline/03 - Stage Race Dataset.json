@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Get Years",
+				"name": "Get File Contents",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -27,7 +27,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "datalake",
+						"referenceName": "datalake_file",
 						"type": "DatasetReference",
 						"parameters": {
 							"container": {
@@ -35,18 +35,72 @@
 								"type": "Expression"
 							},
 							"fileName": {
-								"value": "@pipeline().parameters.fileName",
+								"value": "@concat(pipeline().parameters.directory, '/', pipeline().parameters.filename)",
 								"type": "Expression"
 							}
 						}
+					}
+				}
+			},
+			{
+				"name": "Set years Array",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get File Contents",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "years",
+					"value": {
+						"value": "@activity('Get File Contents').output.firstRow.MRData.SeasonTable.Seasons",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "For Each Year",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set years Array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('years')",
+						"type": "Expression"
 					},
-					"firstRowOnly": false
+					"activities": [
+						{
+							"name": "Wait1",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					]
 				}
 			}
 		],
 		"parameters": {
-			"fileName": {
-				"type": "string"
+			"filename": {
+				"type": "string",
+				"defaultValue": "_1.json"
+			},
+			"directory": {
+				"type": "string",
+				"defaultValue": "7f716b74-18ca-4245-a147-2f2496321d6f/seasons/20230124_040043"
 			}
 		},
 		"variables": {
