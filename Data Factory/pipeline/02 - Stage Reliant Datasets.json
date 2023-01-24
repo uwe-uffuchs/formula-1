@@ -3,50 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Get File Name List",
-				"type": "GetMetadata",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "datalake_directory",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": {
-								"value": "@pipeline().globalParameters.bronze_containername",
-								"type": "Expression"
-							},
-							"directory": {
-								"value": "@pipeline().parameters.seasonsDirectory",
-								"type": "Expression"
-							}
-						}
-					},
-					"fieldList": [
-						"childItems"
-					],
-					"storeSettings": {
-						"type": "AzureBlobFSReadSettings",
-						"enablePartitionDiscovery": false
-					},
-					"formatSettings": {
-						"type": "JsonReadSettings"
-					}
-				}
-			},
-			{
 				"name": "For Each File",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Get File Name List",
+						"activity": "Get Files in Directory",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -72,7 +33,10 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"seasonsFilename": "_1.json",
+									"seasonsFilename": {
+										"value": "@item().season",
+										"type": "Expression"
+									},
 									"seasonsDirectory": {
 										"value": "@pipeline().parameters.seasonsDirectory",
 										"type": "Expression"
@@ -81,6 +45,43 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Get Files in Directory",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "datalake_directory",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.bronze_containername",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.seasonsDirectory",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
 				}
 			}
 		],
