@@ -176,12 +176,7 @@
 						]
 					}
 				],
-				"userProperties": [
-					{
-						"name": "Source",
-						"value": "@{item().endPoint}"
-					}
-				],
+				"userProperties": [],
 				"typeProperties": {
 					"items": {
 						"value": "@variables('endPointsList')",
@@ -213,7 +208,12 @@
 									]
 								}
 							],
-							"userProperties": [],
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "@{item.endPoint}"
+								}
+							],
 							"typeProperties": {
 								"pipeline": {
 									"referenceName": "01 - Stage Full Datasets",
