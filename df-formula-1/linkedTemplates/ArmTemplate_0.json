@@ -88,7 +88,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/datalake')]",
+			"name": "[concat(parameters('factoryName'), '/datalake_file')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -126,7 +126,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ergast_FullDatasets')]",
+			"name": "[concat(parameters('factoryName'), '/ergast')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -167,6 +167,44 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ergast')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/datalake_directory')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "dataLake",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/dataLake')]"
 			]
 		},
 		{
@@ -282,7 +320,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "ergast_FullDatasets",
+								"referenceName": "ergast",
 								"type": "DatasetReference",
 								"parameters": {
 									"limit": {
@@ -302,7 +340,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "datalake",
+								"referenceName": "datalake_file",
 								"type": "DatasetReference",
 								"parameters": {
 									"container": {
@@ -460,7 +498,7 @@
 												},
 												"inputs": [
 													{
-														"referenceName": "ergast_FullDatasets",
+														"referenceName": "ergast",
 														"type": "DatasetReference",
 														"parameters": {
 															"limit": {
@@ -480,7 +518,7 @@
 												],
 												"outputs": [
 													{
-														"referenceName": "datalake",
+														"referenceName": "datalake_file",
 														"type": "DatasetReference",
 														"parameters": {
 															"container": {
@@ -560,8 +598,214 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ergast_FullDatasets')]",
-				"[concat(variables('factoryId'), '/datasets/datalake')]"
+				"[concat(variables('factoryId'), '/datasets/ergast')]",
+				"[concat(variables('factoryId'), '/datasets/datalake_file')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/03 - Stage Race Dataset')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get File Contents",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "datalake_file",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().globalParameters.bronze_containername",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(pipeline().parameters.seasonsDirectory, '/', pipeline().parameters.seasonsFilename)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "Set years Array",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get File Contents",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "years",
+							"value": {
+								"value": "@activity('Get File Contents').output.firstRow.MRData.SeasonTable.Seasons",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "For Each Year",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Set years Array",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set Destination Directory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@variables('years')",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Stage Race Data",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "RestSource",
+											"httpRequestTimeout": "00:01:40",
+											"requestInterval": "00.00:00:00.010",
+											"requestMethod": "GET",
+											"paginationRules": {
+												"supportRFC5988": "true"
+											}
+										},
+										"sink": {
+											"type": "JsonSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "JsonWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ergast",
+											"type": "DatasetReference",
+											"parameters": {
+												"limit": "1000",
+												"endPoint": {
+													"value": "@item().year",
+													"type": "Expression"
+												},
+												"offset": "0"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "datalake_file",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().globalParameters.bronze_containername",
+													"type": "Expression"
+												},
+												"fileName": {
+													"value": "@concat(variables('destinationDirectory'), pipeline().parameters.time, '_1.json')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set Destination Directory",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "destinationDirectory",
+							"value": {
+								"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'schedule')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"seasonsFilename": {
+						"type": "string",
+						"defaultValue": "_1.json"
+					},
+					"seasonsDirectory": {
+						"type": "string",
+						"defaultValue": "7f716b74-18ca-4245-a147-2f2496321d6f/seasons/20230124_040043"
+					},
+					"time": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"years": {
+						"type": "Array"
+					},
+					"destinationDirectory": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Bronze"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/datalake_file')]",
+				"[concat(variables('factoryId'), '/datasets/ergast')]"
 			]
 		},
 		{
@@ -572,7 +816,7 @@
 				"activities": [
 					{
 						"name": "Get File Name List",
-						"type": "Lookup",
+						"type": "GetMetadata",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -583,31 +827,70 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "JsonSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "JsonReadSettings"
-								}
-							},
 							"dataset": {
-								"referenceName": "datalake",
+								"referenceName": "datalake_directory",
 								"type": "DatasetReference",
 								"parameters": {
 									"container": {
 										"value": "@pipeline().globalParameters.bronze_containername",
 										"type": "Expression"
 									},
-									"fileName": {
+									"directory": {
 										"value": "@pipeline().parameters.directory",
 										"type": "Expression"
 									}
 								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "JsonReadSettings"
 							}
+						}
+					},
+					{
+						"name": "For Each File",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get File Name List",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get File Name List').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "03 - Stage Race Dataset",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "03 - Stage Race Dataset",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"time": {
+												"value": "@pipeline().parameters.time",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
 						}
 					}
 				],
@@ -618,91 +901,19 @@
 				"parameters": {
 					"directory": {
 						"type": "string"
-					}
-				},
-				"variables": {
-					"fileNames": {
-						"type": "Array"
-					}
-				},
-				"folder": {
-					"name": "Bronze"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/datalake')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/03 - Stage Race Dataset')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Get Years",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "JsonSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "JsonReadSettings"
-								}
-							},
-							"dataset": {
-								"referenceName": "datalake",
-								"type": "DatasetReference",
-								"parameters": {
-									"container": {
-										"value": "@pipeline().globalParameters.bronze_containername",
-										"type": "Expression"
-									},
-									"fileName": {
-										"value": "@pipeline().parameters.fileName",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"fileName": {
+					},
+					"time": {
 						"type": "string"
 					}
 				},
-				"variables": {
-					"years": {
-						"type": "Array"
-					}
-				},
 				"folder": {
 					"name": "Bronze"
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/datalake')]"
+				"[concat(variables('factoryId'), '/datasets/datalake_directory')]",
+				"[concat(variables('factoryId'), '/pipelines/03 - Stage Race Dataset')]"
 			]
 		},
 		{
@@ -770,7 +981,11 @@
 							"waitOnCompletion": true,
 							"parameters": {
 								"directory": {
-									"value": "@variables('directory')",
+									"value": "@concat(pipeline().RunId, '/seasons/', variables('year'), variables('month'), variables('day'), '_', variables('time'), '/')",
+									"type": "Expression"
+								},
+								"time": {
+									"value": "@variables('time')",
 									"type": "Expression"
 								}
 							}
@@ -814,7 +1029,7 @@
 								}
 							},
 							"dataset": {
-								"referenceName": "datalake",
+								"referenceName": "datalake_file",
 								"type": "DatasetReference",
 								"parameters": {
 									"container": {
@@ -985,7 +1200,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/02 - Stage Reliant Datasets')]",
-				"[concat(variables('factoryId'), '/datasets/datalake')]",
+				"[concat(variables('factoryId'), '/datasets/datalake_file')]",
 				"[concat(variables('factoryId'), '/pipelines/01 - Stage Full Datasets')]"
 			]
 		},
