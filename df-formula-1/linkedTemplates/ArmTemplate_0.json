@@ -348,7 +348,7 @@
 										"type": "Expression"
 									},
 									"fileName": {
-										"value": "@concat(pipeline().parameters.directory, '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
+										"value": "@concat(pipeline().parameters.directory, replace(variables('endPoint'), '/', ''), '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
 										"type": "Expression"
 									}
 								}
@@ -1336,7 +1336,7 @@
 						"typeProperties": {
 							"variableName": "destinationDirectory",
 							"value": {
-								"value": "@replace(pipeline().parameters.seasonsDirectory, 'schedule', 'laps')",
+								"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'laps')",
 								"type": "Expression"
 							}
 						}
