@@ -74,7 +74,12 @@
 						]
 					}
 				],
-				"userProperties": [],
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "@variable('endPoint')"
+					}
+				],
 				"typeProperties": {
 					"items": {
 						"value": "@variables('endPointsList')",
