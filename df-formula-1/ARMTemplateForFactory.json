@@ -1416,7 +1416,7 @@
 										"type": "Expression"
 									},
 									"fileName": {
-										"value": "@concat(pipeline().parameters.seasonsDirectory, '/', pipeline().parameters.year, '_1.json')",
+										"value": "@concat(replace(pipeline().parameters.seasonsDirectory, 'seasons', 'schedule'), '/', pipeline().parameters.year, '_1.json')",
 										"type": "Expression"
 									}
 								}
