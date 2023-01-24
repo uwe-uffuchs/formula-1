@@ -451,7 +451,7 @@
 										"type": "Expression"
 									},
 									"directory": {
-										"value": "@pipeline().parameters.directory",
+										"value": "@pipeline().parameters.seasonsDirectory",
 										"type": "Expression"
 									}
 								}
@@ -498,7 +498,13 @@
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
-										"parameters": {}
+										"parameters": {
+											"seasonsFilename": "_1.json",
+											"seasonsDirectory": {
+												"value": "@pipeline().parameters.seasonsDirectory",
+												"type": "Expression"
+											}
+										}
 									}
 								}
 							]
@@ -510,7 +516,7 @@
 					"cancelAfter": {}
 				},
 				"parameters": {
-					"directory": {
+					"seasonsDirectory": {
 						"type": "string"
 					}
 				},
@@ -938,12 +944,7 @@
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
-							"parameters": {
-								"directory": {
-									"value": "@concat(pipeline().RunId, '/seasons/', variables('year'), variables('month'), variables('day'), '_', variables('time'), '/')",
-									"type": "Expression"
-								}
-							}
+							"parameters": {}
 						}
 					},
 					{
