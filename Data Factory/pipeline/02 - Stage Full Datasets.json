@@ -352,16 +352,20 @@
 				"type": "String"
 			},
 			"limit": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "1000"
 			},
 			"prevOffset": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "0"
 			},
 			"prevPageNo": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "0"
 			},
 			"offset": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "1000"
 			},
 			"totalRecords": {
 				"type": "String"
