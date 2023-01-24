@@ -192,7 +192,7 @@
 							"typeProperties": {
 								"variableName": "directory",
 								"value": {
-									"value": "@concat(item().endPoint, '/', pipeline().RunId, '/', variables('year'), '-', variables('month'), '/', variables('day'), '/')",
+									"value": "@concat(pipeline().RunId, '/', item().endPoint, '/', variables('year'), '-', variables('month'), '/', variables('day'), '/')",
 									"type": "Expression"
 								}
 							}
