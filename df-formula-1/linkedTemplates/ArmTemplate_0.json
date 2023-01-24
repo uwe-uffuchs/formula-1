@@ -1411,7 +1411,12 @@
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
-							"parameters": {}
+							"parameters": {
+								"seasonsDirectory": {
+									"value": "@concat(pipeline().RunId, '/seasons/', variables('year'), variables('month'), variables('day'), '_', variables('time'), '/')",
+									"type": "Expression"
+								}
+							}
 						}
 					},
 					{
