@@ -370,7 +370,7 @@
 			},
 			"offset": {
 				"type": "String",
-				"defaultValue": "1000"
+				"defaultValue": "0"
 			},
 			"totalRecords": {
 				"type": "String"
