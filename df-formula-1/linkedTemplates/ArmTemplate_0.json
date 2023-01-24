@@ -983,6 +983,45 @@
 				"[concat(variables('factoryId'), '/datasets/datalake')]",
 				"[concat(variables('factoryId'), '/pipelines/01 - Stage Full Datasets')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Daily')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "00 - Master",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-01-25T00:00:00",
+						"endTime": "2023-02-28T02:08:00",
+						"timeZone": "New Zealand Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								0
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/00 - Master')]"
+			]
 		}
 	]
 }
