@@ -58,7 +58,13 @@
 						"referenceName": "02 - Stage Reliant Datasets",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"seasonsDirectory": {
+							"value": "@variables('directory')",
+							"type": "Expression"
+						}
+					}
 				}
 			},
 			{
