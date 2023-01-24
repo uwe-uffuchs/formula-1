@@ -703,7 +703,16 @@
 										"secureOutput": false,
 										"secureInput": false
 									},
-									"userProperties": [],
+									"userProperties": [
+										{
+											"name": "Destination",
+											"value": "@{pipeline().globalParameters.bronze_containername}//@{concat(variables('destinationDirectory'), item().season, '_1.json')}"
+										},
+										{
+											"name": "Year",
+											"value": "@item().season"
+										}
+									],
 									"typeProperties": {
 										"source": {
 											"type": "RestSource",
@@ -779,12 +788,10 @@
 				},
 				"parameters": {
 					"seasonsFilename": {
-						"type": "string",
-						"defaultValue": "_1.json"
+						"type": "string"
 					},
 					"seasonsDirectory": {
-						"type": "string",
-						"defaultValue": "7f716b74-18ca-4245-a147-2f2496321d6f/seasons/20230124_040043"
+						"type": "string"
 					}
 				},
 				"variables": {
@@ -1209,7 +1216,7 @@
 				"type": "ScheduleTrigger",
 				"typeProperties": {
 					"recurrence": {
-						"frequency": "Day",
+						"frequency": "Week",
 						"interval": 1,
 						"startTime": "2023-01-25T00:00:00",
 						"endTime": "2023-02-28T02:08:00",
@@ -1220,6 +1227,9 @@
 							],
 							"hours": [
 								0
+							],
+							"weekDays": [
+								"Monday"
 							]
 						}
 					}
