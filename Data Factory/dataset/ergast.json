@@ -1,5 +1,5 @@
 {
-	"name": "ergast_FullDatasets",
+	"name": "ergast",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ergast",

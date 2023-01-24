@@ -121,7 +121,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "ergast_FullDatasets",
+									"referenceName": "ergast",
 									"type": "DatasetReference",
 									"parameters": {
 										"limit": "1000",
