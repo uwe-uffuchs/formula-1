@@ -253,7 +253,12 @@
 							"secureOutput": false,
 							"secureInput": false
 						},
-						"userProperties": [],
+						"userProperties": [
+							{
+								"name": "Destination",
+								"value": "@{pipeline().globalParameters.bronze_containername}//@{concat(pipeline().parameters.directory, '/', pipeline().parameters.time, '_', variables('pageNo'), '.', pipeline().parameters.fileType)}"
+							}
+						],
 						"typeProperties": {
 							"source": {
 								"type": "RestSource",
