@@ -34,7 +34,7 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"seasonsFilename": {
-										"value": "@item().season",
+										"value": "@item().name",
 										"type": "Expression"
 									},
 									"seasonsDirectory": {
