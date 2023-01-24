@@ -136,7 +136,7 @@
 								"type": "Expression"
 							},
 							"fileName": {
-								"value": "@concat(pipeline().parameters.directory, '/', pipeline().parameters.time, '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
+								"value": "@concat(pipeline().parameters.directory, '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
 								"type": "Expression"
 							}
 						}

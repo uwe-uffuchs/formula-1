@@ -75,7 +75,7 @@
 				"typeProperties": {
 					"variableName": "time",
 					"value": {
-						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'hh:mm:ss tt')",
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'hhmmss')",
 						"type": "Expression"
 					}
 				}
@@ -192,7 +192,7 @@
 							"typeProperties": {
 								"variableName": "directory",
 								"value": {
-									"value": "@concat(pipeline().RunId, '/', item().endPoint, '/', variables('year'), '-', variables('month'), '/', variables('day'), '/')",
+									"value": "@concat(pipeline().RunId, '/', item().endPoint, '/', variables('year'), variables('month'), variables('day'), '_', variables('time'), '/')",
 									"type": "Expression"
 								}
 							}
