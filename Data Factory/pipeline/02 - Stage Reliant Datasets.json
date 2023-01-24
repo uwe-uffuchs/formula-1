@@ -28,7 +28,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "03 - Stage Race Dataset",
+									"referenceName": "03 - Stage Race and Lap Times Dataset",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
@@ -40,7 +40,39 @@
 									"seasonsDirectory": {
 										"value": "@pipeline().parameters.seasonsDirectory",
 										"type": "Expression"
-									}
+									},
+									"datasetName": "schedule"
+								}
+							}
+						},
+						{
+							"name": "03 - Stage Lap Times Dataset",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "03 - Stage Race Dataset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "03 - Stage Race and Lap Times Dataset",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"seasonsFilename": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"seasonsDirectory": {
+										"value": "@pipeline().parameters.seasonsDirectory",
+										"type": "Expression"
+									},
+									"datasetName": "laps"
 								}
 							}
 						}

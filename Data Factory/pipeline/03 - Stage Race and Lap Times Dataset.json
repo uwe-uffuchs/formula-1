@@ -1,5 +1,5 @@
 {
-	"name": "03 - Stage Race Dataset",
+	"name": "03 - Stage Race and Lap Times Dataset",
 	"properties": {
 		"activities": [
 			{
@@ -87,77 +87,114 @@
 					},
 					"activities": [
 						{
-							"name": "Stage Race Data",
-							"type": "Copy",
+							"name": "Switch on Dataset",
+							"type": "Switch",
 							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [
-								{
-									"name": "Destination",
-									"value": "@{pipeline().globalParameters.bronze_containername}//@{concat(variables('destinationDirectory'), item().season, '_1.json')}"
-								},
-								{
-									"name": "Year",
-									"value": "@item().season"
-								}
-							],
+							"userProperties": [],
 							"typeProperties": {
-								"source": {
-									"type": "RestSource",
-									"httpRequestTimeout": "00:01:40",
-									"requestInterval": "00.00:00:00.010",
-									"requestMethod": "GET",
-									"paginationRules": {
-										"supportRFC5988": "true"
-									}
+								"on": {
+									"value": "@pipeline().parameters.datasetName",
+									"type": "Expression"
 								},
-								"sink": {
-									"type": "JsonSink",
-									"storeSettings": {
-										"type": "AzureBlobFSWriteSettings"
+								"cases": [
+									{
+										"value": "schedule",
+										"activities": [
+											{
+												"name": "Stage Race Data",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [
+													{
+														"name": "Destination",
+														"value": "@{pipeline().globalParameters.bronze_containername}//@{concat(variables('destinationDirectory'), item().season, '_1.json')}"
+													},
+													{
+														"name": "Year",
+														"value": "@item().season"
+													}
+												],
+												"typeProperties": {
+													"source": {
+														"type": "RestSource",
+														"httpRequestTimeout": "00:01:40",
+														"requestInterval": "00.00:00:00.010",
+														"requestMethod": "GET",
+														"paginationRules": {
+															"supportRFC5988": "true"
+														}
+													},
+													"sink": {
+														"type": "JsonSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "JsonWriteSettings"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "ergast",
+														"type": "DatasetReference",
+														"parameters": {
+															"limit": "1000",
+															"endPoint": {
+																"value": "@item().season",
+																"type": "Expression"
+															},
+															"offset": "0"
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "datalake_file",
+														"type": "DatasetReference",
+														"parameters": {
+															"container": {
+																"value": "@pipeline().globalParameters.bronze_containername",
+																"type": "Expression"
+															},
+															"fileName": {
+																"value": "@concat(variables('destinationDirectory'), '/', item().season, '_1.json')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
 									},
-									"formatSettings": {
-										"type": "JsonWriteSettings"
+									{
+										"value": "laps",
+										"activities": [
+											{
+												"name": "04 - Stage Laps Dataset",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "04 - Stage Laps Dataset",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true
+												}
+											}
+										]
 									}
-								},
-								"enableStaging": false
-							},
-							"inputs": [
-								{
-									"referenceName": "ergast",
-									"type": "DatasetReference",
-									"parameters": {
-										"limit": "1000",
-										"endPoint": {
-											"value": "@item().season",
-											"type": "Expression"
-										},
-										"offset": "0"
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "datalake_file",
-									"type": "DatasetReference",
-									"parameters": {
-										"container": {
-											"value": "@pipeline().globalParameters.bronze_containername",
-											"type": "Expression"
-										},
-										"fileName": {
-											"value": "@concat(variables('destinationDirectory'), '/', item().season, '_1.json')",
-											"type": "Expression"
-										}
-									}
-								}
-							]
+								]
+							}
 						}
 					]
 				}
@@ -181,6 +218,9 @@
 				"type": "string"
 			},
 			"seasonsDirectory": {
+				"type": "string"
+			},
+			"datasetName": {
 				"type": "string"
 			}
 		},

@@ -1,0 +1,132 @@
+{
+	"name": "04 - Stage Laps Dataset",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set years Array",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Race Years",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "years",
+					"value": {
+						"value": "@activity('Get Race Years').output.childItems",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "For Each Year",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set years Array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Destination Directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('years')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Wait1",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Set Destination Directory",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "destinationDirectory",
+					"value": {
+						"value": "@replace(pipeline().parameters.scheduleDirectory, 'schedule', 'laps')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Get Race Years",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "datalake_directory",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.bronze_containername",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.scheduleDirectory",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"scheduleDirectory": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"years": {
+				"type": "Array"
+			},
+			"destinationDirectory": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Bronze"
+		},
+		"annotations": []
+	}
+}
