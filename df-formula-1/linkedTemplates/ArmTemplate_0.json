@@ -758,7 +758,7 @@
 													"type": "Expression"
 												},
 												"fileName": {
-													"value": "@concat(variables('destinationDirectory'), item().season, '_1.json')",
+													"value": "@concat(variables('destinationDirectory'), '/', item().season, '_1.json')",
 													"type": "Expression"
 												}
 											}
@@ -850,7 +850,7 @@
 										"waitOnCompletion": true,
 										"parameters": {
 											"seasonsFilename": {
-												"value": "@item().season",
+												"value": "@item().name",
 												"type": "Expression"
 											},
 											"seasonsDirectory": {
