@@ -891,7 +891,7 @@
 								"value": "@variables('endPointsList')",
 								"type": "Expression"
 							},
-							"isSequential": false,
+							"isSequential": true,
 							"activities": [
 								{
 									"name": "Set Directory",
