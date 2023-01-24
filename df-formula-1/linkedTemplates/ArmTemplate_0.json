@@ -915,7 +915,7 @@
 									"userProperties": [
 										{
 											"name": "Source",
-											"value": "@{item.endPoint}"
+											"value": "@{item().endPoint}"
 										}
 									],
 									"typeProperties": {
