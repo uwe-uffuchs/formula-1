@@ -77,7 +77,7 @@
 				"userProperties": [
 					{
 						"name": "Source",
-						"value": "@variable('endPoint')"
+						"value": "@{item().endPoint}"
 					}
 				],
 				"typeProperties": {
