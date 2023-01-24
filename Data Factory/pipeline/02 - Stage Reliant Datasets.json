@@ -71,12 +71,8 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"filename": {
-										"value": "@item().name",
-										"type": "Expression"
-									},
-									"directory": {
-										"value": "@pipeline().parameters.directory",
+									"time": {
+										"value": "@pipeline().parameters.time",
 										"type": "Expression"
 									}
 								}
@@ -88,6 +84,9 @@
 		],
 		"parameters": {
 			"directory": {
+				"type": "string"
+			},
+			"time": {
 				"type": "string"
 			}
 		},

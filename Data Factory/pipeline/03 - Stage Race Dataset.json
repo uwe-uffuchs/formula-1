@@ -71,6 +71,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "Set Destination Directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"userProperties": [],
@@ -81,31 +87,105 @@
 					},
 					"activities": [
 						{
-							"name": "Wait1",
-							"type": "Wait",
+							"name": "Stage Race Data",
+							"type": "Copy",
 							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
+								"source": {
+									"type": "RestSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"supportRFC5988": "true"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "ergast_FullDatasets",
+									"type": "DatasetReference",
+									"parameters": {
+										"limit": "1000",
+										"endPoint": {
+											"value": "@item().year",
+											"type": "Expression"
+										},
+										"offset": "0"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "datalake_file",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().globalParameters.bronze_containername",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@concat(variables('destinationDirectory'), pipeline().parameters.time, '_1.json')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						}
 					]
+				}
+			},
+			{
+				"name": "Set Destination Directory",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "destinationDirectory",
+					"value": {
+						"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'schedule')",
+						"type": "Expression"
+					}
 				}
 			}
 		],
 		"parameters": {
-			"filename": {
+			"seasonsFilename": {
 				"type": "string",
 				"defaultValue": "_1.json"
 			},
-			"directory": {
+			"seasonsDirectory": {
 				"type": "string",
 				"defaultValue": "7f716b74-18ca-4245-a147-2f2496321d6f/seasons/20230124_040043"
+			},
+			"time": {
+				"type": "string"
 			}
 		},
 		"variables": {
 			"years": {
 				"type": "Array"
+			},
+			"destinationDirectory": {
+				"type": "String"
 			}
 		},
 		"folder": {
