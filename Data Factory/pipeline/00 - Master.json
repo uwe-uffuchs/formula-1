@@ -63,6 +63,10 @@
 						"seasonsDirectory": {
 							"value": "@concat(pipeline().RunId, '/seasons/', variables('year'), variables('month'), variables('day'), '_', variables('time'), '/')",
 							"type": "Expression"
+						},
+						"time": {
+							"value": "@variables('time')",
+							"type": "Expression"
 						}
 					}
 				}
