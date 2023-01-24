@@ -70,7 +70,14 @@
 									"referenceName": "03 - Stage Race Dataset",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"seasonsFilename": "_1.json",
+									"seasonsDirectory": {
+										"value": "@pipeline().parameters.seasonsDirectory",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
@@ -78,7 +85,7 @@
 			}
 		],
 		"parameters": {
-			"directory": {
+			"seasonsDirectory": {
 				"type": "string"
 			}
 		},
