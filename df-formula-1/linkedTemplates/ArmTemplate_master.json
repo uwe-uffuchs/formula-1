@@ -11,13 +11,17 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'dataLake'"
 		},
-		"keyVault_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://kv-formula-1-secrets.vault.azure.net/"
-		},
 		"dataLake_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://sadlformula1.dfs.core.windows.net/"
+		},
+		"ergast_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{concat('https://ergast.com/api/f1/', linkedService().endPoint, '.', linkedService().fileType, '?limit=', linkedService().limit, '&offset=', linkedService().offset)}"
+		},
+		"keyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-formula-1-secrets.vault.azure.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -49,11 +53,14 @@
 					"dataLake_accountKey": {
 						"value": "[parameters('dataLake_accountKey')]"
 					},
-					"keyVault_properties_typeProperties_baseUrl": {
-						"value": "[parameters('keyVault_properties_typeProperties_baseUrl')]"
-					},
 					"dataLake_properties_typeProperties_url": {
 						"value": "[parameters('dataLake_properties_typeProperties_url')]"
+					},
+					"ergast_properties_typeProperties_url": {
+						"value": "[parameters('ergast_properties_typeProperties_url')]"
+					},
+					"keyVault_properties_typeProperties_baseUrl": {
+						"value": "[parameters('keyVault_properties_typeProperties_baseUrl')]"
 					}
 				}
 			},

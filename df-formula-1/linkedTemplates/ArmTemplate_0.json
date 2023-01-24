@@ -11,32 +11,23 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'dataLake'"
 		},
-		"keyVault_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://kv-formula-1-secrets.vault.azure.net/"
-		},
 		"dataLake_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://sadlformula1.dfs.core.windows.net/"
+		},
+		"ergast_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{concat('https://ergast.com/api/f1/', linkedService().endPoint, '.', linkedService().fileType, '?limit=', linkedService().limit, '&offset=', linkedService().offset)}"
+		},
+		"keyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-formula-1-secrets.vault.azure.net/"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/keyVault')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('keyVault_properties_typeProperties_baseUrl')]"
-				}
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dataLake')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -55,13 +46,157 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Master')]",
+			"name": "[concat(parameters('factoryName'), '/ergast')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"limit": {
+						"type": "string"
+					},
+					"endPoint": {
+						"type": "string"
+					},
+					"fileType": {
+						"type": "string"
+					},
+					"offset": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('ergast_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/keyVault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('keyVault_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/datalake')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "dataLake",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/dataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ergast_FullDatasets')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ergast",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"limit": {
+							"value": "@dataset().limit",
+							"type": "Expression"
+						},
+						"endPoint": {
+							"value": "@dataset().endPoint",
+							"type": "Expression"
+						},
+						"fileType": "json",
+						"offset": {
+							"value": "@dataset().offset",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"limit": {
+						"type": "string"
+					},
+					"endPoint": {
+						"type": "string"
+					},
+					"offset": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ergast')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/02 - Stage Full Datasets')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Get Data",
+						"name": "Set Total Records",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get First Page",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "totalRecords",
+							"value": {
+								"value": "@activity('Get First Page').output.MRData.total",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Get First Page",
 						"type": "WebActivity",
 						"dependsOn": [],
 						"policy": {
@@ -73,9 +208,293 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"url": "http://test.com",
+							"url": {
+								"value": "@concat('https://ergast.com/api/f1/', pipeline().parameters.endPoint, '.', pipeline().parameters.fileType, '?limit=', variables('limit'), '&offset=', variables('offset'))",
+								"type": "Expression"
+							},
 							"method": "GET",
 							"headers": {}
+						}
+					},
+					{
+						"name": "Set Page Number",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pageNo",
+							"value": {
+								"value": "@pipeline().parameters.startPageNo",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Save Page 1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Set Page Number",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set Total Records",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "ergast_FullDatasets",
+								"type": "DatasetReference",
+								"parameters": {
+									"limit": {
+										"value": "@variables('limit')",
+										"type": "Expression"
+									},
+									"endPoint": {
+										"value": "@pipeline().parameters.endPoint",
+										"type": "Expression"
+									},
+									"offset": {
+										"value": "@variables('offset')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "datalake",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().globalParameters.bronze_containername",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(pipeline().parameters.directory, '/', pipeline().parameters.time, '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Until End Of API",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "Save Page 1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greaterOrEquals(add(int(variables('prevOffset')), int(variables('limit'))), int(variables('totalRecords')))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Set Previous Offset",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "prevOffset",
+										"value": {
+											"value": "@variables('offset')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set Previous Page Number",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "prevPageNo",
+										"value": {
+											"value": "@variables('pageNo')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Update Offset",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Set Previous Offset",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "offset",
+										"value": {
+											"value": "@string(add(int(variables('prevOffset')), int(variables('limit'))))",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Update Page Number",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Set Previous Page Number",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "pageNo",
+										"value": {
+											"value": "@string(add(int(variables('prevPageNo')), int('1')))",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "If Not End Of API",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Update Offset",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "Update Page Number",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@less(int(variables('offset')), int(variables('totalRecords')))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Stage Data",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "RestSource",
+														"httpRequestTimeout": "00:01:40",
+														"requestInterval": "00.00:00:00.010",
+														"requestMethod": "GET",
+														"paginationRules": {
+															"supportRFC5988": "true"
+														}
+													},
+													"sink": {
+														"type": "JsonSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "JsonWriteSettings"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "ergast_FullDatasets",
+														"type": "DatasetReference",
+														"parameters": {
+															"limit": {
+																"value": "@variables('limit')",
+																"type": "Expression"
+															},
+															"endPoint": {
+																"value": "@pipeline().parameters.endPoint",
+																"type": "Expression"
+															},
+															"offset": {
+																"value": "@variables('offset')",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "datalake",
+														"type": "DatasetReference",
+														"parameters": {
+															"container": {
+																"value": "@pipeline().globalParameters.bronze_containername",
+																"type": "Expression"
+															},
+															"fileName": {
+																"value": "@concat(pipeline().parameters.directory, pipeline().parameters.time, '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							],
+							"timeout": "0.12:00:00"
 						}
 					}
 				],
@@ -83,12 +502,554 @@
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
 				},
+				"parameters": {
+					"directory": {
+						"type": "string"
+					},
+					"startPageNo": {
+						"type": "string"
+					},
+					"endPoint": {
+						"type": "string"
+					},
+					"fileType": {
+						"type": "string"
+					},
+					"time": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"pageNo": {
+						"type": "String"
+					},
+					"endPoint": {
+						"type": "String"
+					},
+					"directory": {
+						"type": "String"
+					},
+					"limit": {
+						"type": "String",
+						"defaultValue": "1000"
+					},
+					"prevOffset": {
+						"type": "String",
+						"defaultValue": "0"
+					},
+					"prevPageNo": {
+						"type": "String",
+						"defaultValue": "0"
+					},
+					"offset": {
+						"type": "String",
+						"defaultValue": "1000"
+					},
+					"totalRecords": {
+						"type": "String"
+					}
+				},
 				"folder": {
 					"name": "Bronze"
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ergast_FullDatasets')]",
+				"[concat(variables('factoryId'), '/datasets/datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/03 - Stage Reliant Datasets')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get File Name List",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "datalake",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().globalParameters.bronze_containername",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@pipeline().parameters.directory",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"directory": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"fileNames": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Bronze"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/04 - Stage Race Dataset')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Years",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "datalake",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().globalParameters.bronze_containername",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@pipeline().parameters.fileName",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"years": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Bronze"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/01 - Stage Data')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set Year",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "year",
+							"value": {
+								"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'yyyy')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set Month",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "month",
+							"value": {
+								"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'MM')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set Day",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "day",
+							"value": {
+								"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'dd')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set Time",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "time",
+							"value": {
+								"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'hh:mm:ss tt')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Stage Reliant Datasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Stage Full Datasets",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "03 - Stage Reliant Datasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"directory": {
+									"value": "@variables('directory')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Stage Full Datasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set Directory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "02 - Stage Full Datasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"directory": {
+									"value": "@variables('directory')",
+									"type": "Expression"
+								},
+								"startPageNo": "1",
+								"endPoint": {
+									"value": "@pipeline().parameters.endPoint",
+									"type": "Expression"
+								},
+								"fileType": "json",
+								"time": {
+									"value": "@variables('time')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set Directory",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set Time",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set Day",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set Year",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set Month",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "directory",
+							"value": {
+								"value": "@concat(pipeline().parameters.endPoint, '/', pipeline().RunId, '/', variables('year'), '-', variables('month'), '/', variables('day'), '/')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"endPoint": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"year": {
+						"type": "String"
+					},
+					"month": {
+						"type": "String"
+					},
+					"day": {
+						"type": "String"
+					},
+					"time": {
+						"type": "String"
+					},
+					"directory": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Bronze"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/03 - Stage Reliant Datasets')]",
+				"[concat(variables('factoryId'), '/pipelines/02 - Stage Full Datasets')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/00 - Master')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get End Points",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "datalake",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().globalParameters.config_containername",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@pipeline().globalParameters.ergast_fulldatasets_filename",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Set endPoints Array",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get End Points",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "endPointsList",
+							"value": {
+								"value": "@activity('Get End Points').output.value",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "For Each End Point",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Set endPoints Array",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "@variable('endPoint')"
+							}
+						],
+						"typeProperties": {
+							"items": {
+								"value": "@variables('endPointsList')",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Set End Point",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "endPoint",
+										"value": {
+											"value": "@item().endPoint",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Get Full Datasets",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "Set End Point",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "01 - Stage Data",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"endPoint": {
+												"value": "@item().endPoint",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"endPointsList": {
+						"type": "Array"
+					},
+					"endPoint": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Bronze"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/datalake')]",
+				"[concat(variables('factoryId'), '/pipelines/01 - Stage Data')]"
+			]
 		}
 	]
 }

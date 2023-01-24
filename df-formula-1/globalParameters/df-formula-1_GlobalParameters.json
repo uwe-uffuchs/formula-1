@@ -1,1 +1,22 @@
-{}
+{
+	"ergast_fulldatasets_filename": {
+		"type": "string",
+		"value": "ergast_FullDatasets.json"
+	},
+	"config_containername": {
+		"type": "string",
+		"value": "config"
+	},
+	"bronze_containername": {
+		"type": "string",
+		"value": "bronze"
+	},
+	"silver_containername": {
+		"type": "string",
+		"value": "silver"
+	},
+	"gold_containername": {
+		"type": "string",
+		"value": "gold"
+	}
+}

@@ -8,11 +8,14 @@
 		"dataLake_accountKey": {
 			"value": ""
 		},
-		"keyVault_properties_typeProperties_baseUrl": {
-			"value": "https://kv-formula-1-secrets.vault.azure.net/"
-		},
 		"dataLake_properties_typeProperties_url": {
 			"value": "https://sadlformula1.dfs.core.windows.net/"
+		},
+		"ergast_properties_typeProperties_url": {
+			"value": "@{concat('https://ergast.com/api/f1/', linkedService().endPoint, '.', linkedService().fileType, '?limit=', linkedService().limit, '&offset=', linkedService().offset)}"
+		},
+		"keyVault_properties_typeProperties_baseUrl": {
+			"value": "https://kv-formula-1-secrets.vault.azure.net/"
 		},
 		"containerUri": {
 			"value": ""
