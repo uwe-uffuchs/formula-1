@@ -1,0 +1,68 @@
+{
+	"name": "04 - Stage Laps Dataset",
+	"properties": {
+		"activities": [
+			{
+				"name": "For Each Race",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.races",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Stage Full Datasets",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "01 - Stage Full Datasets",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"directory": {
+										"value": "@pipeline().parameters.directory",
+										"type": "Expression"
+									},
+									"startPageNo": "1",
+									"endPoint": {
+										"value": "@concat(pipeline().parameters.year, '/', item().round, '/laps')",
+										"type": "Expression"
+									},
+									"fileType": "json",
+									"time": {
+										"value": "@pipeline().parameters.time",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"races": {
+				"type": "array"
+			},
+			"directory": {
+				"type": "string"
+			},
+			"time": {
+				"type": "string"
+			},
+			"year": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Bronze"
+		},
+		"annotations": []
+	}
+}

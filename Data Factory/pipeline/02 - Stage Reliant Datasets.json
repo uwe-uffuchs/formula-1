@@ -1,0 +1,179 @@
+{
+	"name": "02 - Stage Reliant Datasets",
+	"properties": {
+		"activities": [
+			{
+				"name": "For Each File",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get File Name List",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get File Name List').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Stage Race Dataset",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "03 - Stage Race - Lap Times - Pitstop Dataset",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"seasonsFilename": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"seasonsDirectory": {
+										"value": "@pipeline().parameters.seasonsDirectory",
+										"type": "Expression"
+									},
+									"datasetName": "schedule",
+									"time": {
+										"value": "@pipeline().parameters.time",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Stage Lap Times Dataset",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Stage Race Dataset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "03 - Stage Race - Lap Times - Pitstop Dataset",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"seasonsFilename": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"seasonsDirectory": {
+										"value": "@pipeline().parameters.seasonsDirectory",
+										"type": "Expression"
+									},
+									"datasetName": "laps",
+									"time": {
+										"value": "@pipeline().parameters.time",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Stage Pitstops Dataset",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Stage Race Dataset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "03 - Stage Race - Lap Times - Pitstop Dataset",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"seasonsFilename": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"seasonsDirectory": {
+										"value": "@pipeline().parameters.seasonsDirectory",
+										"type": "Expression"
+									},
+									"datasetName": "pitstops",
+									"time": {
+										"value": "@pipeline().parameters.time",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get File Name List",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "datalake_directory",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.bronze_containername",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.seasonsDirectory",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"seasonsDirectory": {
+				"type": "string"
+			},
+			"time": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Bronze"
+		},
+		"annotations": []
+	}
+}

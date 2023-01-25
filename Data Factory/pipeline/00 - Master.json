@@ -1,0 +1,277 @@
+{
+	"name": "00 - Master",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set Year",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "year",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'yyyy')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Month",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "month",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'MM')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Day",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "day",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'dd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Stage Reliant Datasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "For Each End Point",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "02 - Stage Reliant Datasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"seasonsDirectory": {
+							"value": "@concat(variables('year'), variables('month'), variables('day'), '_', variables('time'), '/seasons/')",
+							"type": "Expression"
+						},
+						"time": {
+							"value": "@variables('time')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set Time",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "time",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'hhmmss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Get End Points",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "datalake_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.config_containername",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@pipeline().globalParameters.ergast_fulldatasets_filename",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Set endPoints Array",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get End Points",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "endPointsList",
+					"value": {
+						"value": "@activity('Get End Points').output.value",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "For Each End Point",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set endPoints Array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Time",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Day",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Year",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('endPointsList')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Set Directory",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "directory",
+								"value": {
+									"value": "@concat(variables('year'), variables('month'), variables('day'), '_', variables('time'), '/', item().endPoint, '/')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Stage Full Datasets",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Set Directory",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "@{item().endPoint}"
+								}
+							],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "01 - Stage Full Datasets",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"directory": {
+										"value": "@variables('directory')",
+										"type": "Expression"
+									},
+									"startPageNo": "1",
+									"endPoint": {
+										"value": "@item().endPoint",
+										"type": "Expression"
+									},
+									"fileType": "json",
+									"time": {
+										"value": "@variables('time')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"endPointsList": {
+				"type": "Array"
+			},
+			"endPoint": {
+				"type": "String"
+			},
+			"year": {
+				"type": "String"
+			},
+			"month": {
+				"type": "String"
+			},
+			"day": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			},
+			"directory": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Bronze"
+		},
+		"annotations": []
+	}
+}

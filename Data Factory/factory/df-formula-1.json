@@ -1,0 +1,33 @@
+{
+	"name": "df-formula-1",
+	"properties": {
+		"globalParameters": {
+			"ergast_fulldatasets_filename": {
+				"type": "string",
+				"value": "ergast_FullDatasets.json"
+			},
+			"config_containername": {
+				"type": "string",
+				"value": "config"
+			},
+			"bronze_containername": {
+				"type": "string",
+				"value": "bronze"
+			},
+			"silver_containername": {
+				"type": "string",
+				"value": "silver"
+			},
+			"gold_containername": {
+				"type": "string",
+				"value": "gold"
+			}
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "a74000d3-2270-445c-92aa-69480b4a18b4",
+		"tenantId": "b37134ca-e690-4f9f-8a26-cf5617a27055"
+	}
+}

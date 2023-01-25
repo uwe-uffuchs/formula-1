@@ -1,0 +1,289 @@
+{
+	"name": "03 - Stage Race - Lap Times - Pitstop Dataset",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get File Contents",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "datalake_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.bronze_containername",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@concat(pipeline().parameters.seasonsDirectory, '/', pipeline().parameters.seasonsFilename)",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Set years Array",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get File Contents",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "years",
+					"value": {
+						"value": "@activity('Get File Contents').output.firstRow.MRData.SeasonTable.Seasons",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "For Each Year",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set years Array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Destination Directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('years')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Switch on Dataset",
+							"type": "Switch",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"on": {
+									"value": "@pipeline().parameters.datasetName",
+									"type": "Expression"
+								},
+								"cases": [
+									{
+										"value": "schedule",
+										"activities": [
+											{
+												"name": "Stage Race Data",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 1,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [
+													{
+														"name": "Destination",
+														"value": "@{pipeline().globalParameters.bronze_containername}//@{concat(variables('destinationDirectory'), item().season, '_1.json')}"
+													},
+													{
+														"name": "Year",
+														"value": "@item().season"
+													}
+												],
+												"typeProperties": {
+													"source": {
+														"type": "RestSource",
+														"httpRequestTimeout": "00:01:40",
+														"requestInterval": "00.00:00:00.010",
+														"requestMethod": "GET",
+														"paginationRules": {
+															"supportRFC5988": "true"
+														}
+													},
+													"sink": {
+														"type": "JsonSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "JsonWriteSettings"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "ergast",
+														"type": "DatasetReference",
+														"parameters": {
+															"limit": "1000",
+															"endPoint": {
+																"value": "@item().season",
+																"type": "Expression"
+															},
+															"offset": "0"
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "datalake_file",
+														"type": "DatasetReference",
+														"parameters": {
+															"container": {
+																"value": "@pipeline().globalParameters.bronze_containername",
+																"type": "Expression"
+															},
+															"fileName": {
+																"value": "@concat(variables('destinationDirectory'), '/', item().season, '_1.json')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									},
+									{
+										"value": "laps",
+										"activities": [
+											{
+												"name": "Get Laps Dataset",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "04 - Get Race Laps",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"seasonsDirectory": {
+															"value": "@pipeline().parameters.seasonsDirectory",
+															"type": "Expression"
+														},
+														"year": {
+															"value": "@item().season",
+															"type": "Expression"
+														},
+														"time": {
+															"value": "@pipeline().parameters.time",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									},
+									{
+										"value": "pitstops",
+										"activities": [
+											{
+												"name": "Get Pitstop Dataset",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "04 - Get Race Pitstops",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"seasonsDirectory": {
+															"value": "@pipeline().parameters.seasonsDirectory",
+															"type": "Expression"
+														},
+														"year": {
+															"value": "@item().season",
+															"type": "Expression"
+														},
+														"time": {
+															"value": "@pipeline().parameters.time",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Set Destination Directory",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "destinationDirectory",
+					"value": {
+						"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'schedule')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"seasonsFilename": {
+				"type": "string"
+			},
+			"seasonsDirectory": {
+				"type": "string"
+			},
+			"datasetName": {
+				"type": "string"
+			},
+			"time": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"years": {
+				"type": "Array"
+			},
+			"destinationDirectory": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Bronze"
+		},
+		"annotations": []
+	}
+}
