@@ -1860,7 +1860,7 @@
 							"waitOnCompletion": true,
 							"parameters": {
 								"seasonsDirectory": {
-									"value": "@concat(pipeline().RunId, '/seasons/', variables('year'), variables('month'), variables('day'), '_', variables('time'), '/')",
+									"value": "@concat(variables('year'), variables('month'), variables('day'), '_', variables('time'), '/seasons/')",
 									"type": "Expression"
 								},
 								"time": {
@@ -1995,7 +1995,7 @@
 									"typeProperties": {
 										"variableName": "directory",
 										"value": {
-											"value": "@concat(pipeline().RunId, '/', item().endPoint, '/', variables('year'), variables('month'), variables('day'), '_', variables('time'), '/')",
+											"value": "@concat(variables('year'), variables('month'), variables('day'), '_', variables('time'), '/', item().endPoint, '/')",
 											"type": "Expression"
 										}
 									}
