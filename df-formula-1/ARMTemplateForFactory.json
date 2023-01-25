@@ -111,7 +111,7 @@
 						"typeProperties": {
 							"variableName": "time",
 							"value": {
-								"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'hhmmss')",
+								"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'HHmmss')",
 								"type": "Expression"
 							}
 						}
@@ -1751,6 +1751,160 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/04 - Stage Laps Dataset')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "For Each Race",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.races",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Stage Full Datasets",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "01 - Stage Full Datasets",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"directory": {
+												"value": "@pipeline().parameters.directory",
+												"type": "Expression"
+											},
+											"startPageNo": "1",
+											"endPoint": {
+												"value": "@concat(pipeline().parameters.year, '/', item().round, '/laps')",
+												"type": "Expression"
+											},
+											"fileType": "json",
+											"time": {
+												"value": "@pipeline().parameters.time",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"races": {
+						"type": "array"
+					},
+					"directory": {
+						"type": "string"
+					},
+					"time": {
+						"type": "string"
+					},
+					"year": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Bronze"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/01 - Stage Full Datasets')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/04 - Stage Pitstop Dataset')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "For Each Race",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.races",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Stage Full Datasets",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "01 - Stage Full Datasets",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"directory": {
+												"value": "@pipeline().parameters.directory",
+												"type": "Expression"
+											},
+											"startPageNo": "1",
+											"endPoint": {
+												"value": "@concat(pipeline().parameters.year, '/', item().round, '/pitstops')",
+												"type": "Expression"
+											},
+											"fileType": "json",
+											"time": {
+												"value": "@pipeline().parameters.time",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"directory": {
+						"type": "string"
+					},
+					"year": {
+						"type": "string"
+					},
+					"time": {
+						"type": "string"
+					},
+					"races": {
+						"type": "array"
+					}
+				},
+				"folder": {
+					"name": "Bronze"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/01 - Stage Full Datasets')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/datalake_directory')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1969,160 +2123,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/00 - Master')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/04 - Stage Laps Dataset')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "For Each Race",
-						"type": "ForEach",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@pipeline().parameters.races",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Stage Full Datasets",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "01 - Stage Full Datasets",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"directory": {
-												"value": "@pipeline().parameters.directory",
-												"type": "Expression"
-											},
-											"startPageNo": "1",
-											"endPoint": {
-												"value": "@concat(pipeline().parameters.year, '/', item().round, '/laps')",
-												"type": "Expression"
-											},
-											"fileType": "json",
-											"time": {
-												"value": "@pipeline().parameters.time",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"races": {
-						"type": "array"
-					},
-					"directory": {
-						"type": "string"
-					},
-					"time": {
-						"type": "string"
-					},
-					"year": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Bronze"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/01 - Stage Full Datasets')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/04 - Stage Pitstop Dataset')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "For Each Race",
-						"type": "ForEach",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@pipeline().parameters.races",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Stage Full Datasets",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "01 - Stage Full Datasets",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"directory": {
-												"value": "@pipeline().parameters.directory",
-												"type": "Expression"
-											},
-											"startPageNo": "1",
-											"endPoint": {
-												"value": "@concat(pipeline().parameters.year, '/', item().round, '/pitstops')",
-												"type": "Expression"
-											},
-											"fileType": "json",
-											"time": {
-												"value": "@pipeline().parameters.time",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"directory": {
-						"type": "string"
-					},
-					"year": {
-						"type": "string"
-					},
-					"time": {
-						"type": "string"
-					},
-					"races": {
-						"type": "array"
-					}
-				},
-				"folder": {
-					"name": "Bronze"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/01 - Stage Full Datasets')]"
 			]
 		}
 	]

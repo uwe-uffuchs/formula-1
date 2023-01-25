@@ -1878,7 +1878,7 @@
 						"typeProperties": {
 							"variableName": "time",
 							"value": {
-								"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'hhmmss')",
+								"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time'), 'HHmmss')",
 								"type": "Expression"
 							}
 						}
