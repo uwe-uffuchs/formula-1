@@ -22,7 +22,7 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "03 - Stage Race Dataset",
+							"name": "Stage Race Dataset",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
@@ -50,11 +50,11 @@
 							}
 						},
 						{
-							"name": "03 - Stage Lap Times Dataset",
+							"name": "Stage Lap Times Dataset",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "03 - Stage Race Dataset",
+									"activity": "Stage Race Dataset",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -85,11 +85,11 @@
 							}
 						},
 						{
-							"name": "03 - Stage Pitstops Dataset",
+							"name": "Stage Pitstops Dataset",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "03 - Stage Race Dataset",
+									"activity": "Stage Race Dataset",
 									"dependencyConditions": [
 										"Succeeded"
 									]

@@ -14,7 +14,7 @@
 					},
 					"activities": [
 						{
-							"name": "01 - Stage Full Datasets",
+							"name": "Stage Full Datasets",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
