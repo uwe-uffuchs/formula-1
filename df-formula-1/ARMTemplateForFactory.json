@@ -1624,7 +1624,7 @@
 									"typeProperties": {
 										"variableName": "destinationDirectory",
 										"value": {
-											"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'laps')",
+											"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'pitstops')",
 											"type": "Expression"
 										}
 									}
@@ -2083,7 +2083,7 @@
 											},
 											"startPageNo": "1",
 											"endPoint": {
-												"value": "@concat(pipeline().parameters.year, '/', item().round, '/laps')",
+												"value": "@concat(pipeline().parameters.year, '/', item().round, '/pitstops')",
 												"type": "Expression"
 											},
 											"fileType": "json",
