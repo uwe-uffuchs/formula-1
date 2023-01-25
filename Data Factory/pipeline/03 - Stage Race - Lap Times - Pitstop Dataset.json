@@ -185,7 +185,7 @@
 												"userProperties": [],
 												"typeProperties": {
 													"pipeline": {
-														"referenceName": "04 - Stage Laps Dataset",
+														"referenceName": "04 - Get Race Laps",
 														"type": "PipelineReference"
 													},
 													"waitOnCompletion": true,
@@ -217,7 +217,7 @@
 												"userProperties": [],
 												"typeProperties": {
 													"pipeline": {
-														"referenceName": "04 - Stage Pitstop Dataset",
+														"referenceName": "04 - Get Race Pitstops",
 														"type": "PipelineReference"
 													},
 													"waitOnCompletion": true,

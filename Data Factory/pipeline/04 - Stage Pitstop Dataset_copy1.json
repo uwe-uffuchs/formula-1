@@ -1,15 +1,15 @@
 {
-	"name": "04 - Get Race Laps",
+	"name": "04 - Stage Pitstop Dataset_copy1",
 	"properties": {
 		"activities": [
 			{
-				"name": "If After 1995",
+				"name": "If After 2011",
 				"type": "IfCondition",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greaterOrEquals(int(pipeline().parameters.year), 1996)",
+						"value": "@greaterOrEquals(int(pipeline().parameters.year), 2012)",
 						"type": "Expression"
 					},
 					"ifTrueActivities": [
