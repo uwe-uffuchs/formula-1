@@ -41,7 +41,7 @@
 							"typeProperties": {
 								"variableName": "destinationDirectory",
 								"value": {
-									"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'laps')",
+									"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'pitstops')",
 									"type": "Expression"
 								}
 							}

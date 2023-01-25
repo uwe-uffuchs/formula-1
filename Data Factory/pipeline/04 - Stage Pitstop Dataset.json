@@ -31,7 +31,7 @@
 									},
 									"startPageNo": "1",
 									"endPoint": {
-										"value": "@concat(pipeline().parameters.year, '/', item().round, '/laps')",
+										"value": "@concat(pipeline().parameters.year, '/', item().round, '/pitstops')",
 										"type": "Expression"
 									},
 									"fileType": "json",
