@@ -3,141 +3,41 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "If After 1995",
-				"type": "IfCondition",
+				"name": "For Each Race",
+				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
-					"expression": {
-						"value": "@greaterOrEquals(int(pipeline().parameters.year), 1996)",
+					"items": {
+						"value": "@pipeline().parameters.races",
 						"type": "Expression"
 					},
-					"ifTrueActivities": [
+					"activities": [
 						{
-							"name": "Set races Array",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "Get Race Schedule for a Season",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "races",
-								"value": {
-									"value": "@activity('Get Race Schedule for a Season').output.firstRow.MRData.RaceTable.Races",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "For Each Race",
-							"type": "ForEach",
-							"dependsOn": [
-								{
-									"activity": "Set races Array",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "Set Destination Directory",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"items": {
-									"value": "@variables('races')",
-									"type": "Expression"
-								},
-								"activities": [
-									{
-										"name": "01 - Stage Full Datasets",
-										"type": "ExecutePipeline",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"pipeline": {
-												"referenceName": "01 - Stage Full Datasets",
-												"type": "PipelineReference"
-											},
-											"waitOnCompletion": true,
-											"parameters": {
-												"directory": {
-													"value": "@variables('destinationDirectory')",
-													"type": "Expression"
-												},
-												"startPageNo": "1",
-												"endPoint": {
-													"value": "@concat(pipeline().parameters.year, '/', item().round, '/laps')",
-													"type": "Expression"
-												},
-												"fileType": "json",
-												"time": {
-													"value": "@pipeline().parameters.time",
-													"type": "Expression"
-												}
-											}
-										}
-									}
-								]
-							}
-						},
-						{
-							"name": "Set Destination Directory",
-							"type": "SetVariable",
+							"name": "01 - Stage Full Datasets",
+							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "destinationDirectory",
-								"value": {
-									"value": "@replace(pipeline().parameters.seasonsDirectory, 'seasons', 'laps')",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Get Race Schedule for a Season",
-							"type": "Lookup",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "JsonSource",
-									"storeSettings": {
-										"type": "AzureBlobFSReadSettings",
-										"recursive": true,
-										"enablePartitionDiscovery": false
+								"pipeline": {
+									"referenceName": "01 - Stage Full Datasets",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"directory": {
+										"value": "@pipeline().parameters.directory",
+										"type": "Expression"
 									},
-									"formatSettings": {
-										"type": "JsonReadSettings"
-									}
-								},
-								"dataset": {
-									"referenceName": "datalake_file",
-									"type": "DatasetReference",
-									"parameters": {
-										"container": {
-											"value": "@pipeline().globalParameters.bronze_containername",
-											"type": "Expression"
-										},
-										"fileName": {
-											"value": "@concat(replace(pipeline().parameters.seasonsDirectory, 'seasons', 'schedule'), '/', pipeline().parameters.year, '_1.json')",
-											"type": "Expression"
-										}
+									"startPageNo": "1",
+									"endPoint": {
+										"value": "@concat(pipeline().parameters.year, '/', item().round, '/laps')",
+										"type": "Expression"
+									},
+									"fileType": "json",
+									"time": {
+										"value": "@pipeline().parameters.time",
+										"type": "Expression"
 									}
 								}
 							}
@@ -147,22 +47,17 @@
 			}
 		],
 		"parameters": {
-			"seasonsDirectory": {
-				"type": "string"
+			"races": {
+				"type": "array"
 			},
-			"year": {
+			"directory": {
 				"type": "string"
 			},
 			"time": {
 				"type": "string"
-			}
-		},
-		"variables": {
-			"races": {
-				"type": "Array"
 			},
-			"destinationDirectory": {
-				"type": "String"
+			"year": {
+				"type": "string"
 			}
 		},
 		"folder": {
