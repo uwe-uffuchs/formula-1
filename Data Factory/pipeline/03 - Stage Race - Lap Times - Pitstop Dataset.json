@@ -179,7 +179,7 @@
 										"value": "laps",
 										"activities": [
 											{
-												"name": "04 - Stage Laps Dataset",
+												"name": "Get Laps Dataset",
 												"type": "ExecutePipeline",
 												"dependsOn": [],
 												"userProperties": [],
@@ -211,7 +211,7 @@
 										"value": "pitstops",
 										"activities": [
 											{
-												"name": "04 - Stage Pitstop Dataset",
+												"name": "Get Pitstop Dataset",
 												"type": "ExecutePipeline",
 												"dependsOn": [],
 												"userProperties": [],
