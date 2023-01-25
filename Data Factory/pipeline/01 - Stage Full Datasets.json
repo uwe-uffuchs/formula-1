@@ -136,7 +136,7 @@
 								"type": "Expression"
 							},
 							"fileName": {
-								"value": "@concat(pipeline().parameters.directory, replace(pipeline().parameters.endPoint, '/', ''), '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
+								"value": "@concat(pipeline().parameters.directory, replace(pipeline().parameters.endPoint, '/', '-'), '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
 								"type": "Expression"
 							}
 						}
@@ -314,7 +314,7 @@
 														"type": "Expression"
 													},
 													"fileName": {
-														"value": "@concat(pipeline().parameters.directory, replace(pipeline().parameters.endPoint, '/', ''), '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
+														"value": "@concat(pipeline().parameters.directory, replace(pipeline().parameters.endPoint, '/', '-'), '_', variables('pageNo'), '.', pipeline().parameters.fileType)",
 														"type": "Expression"
 													}
 												}
