@@ -28,7 +28,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "03 - Stage Race and Lap Times Dataset",
+									"referenceName": "03 - Stage Race - Lap Times - Pitstop Dataset",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
@@ -41,7 +41,11 @@
 										"value": "@pipeline().parameters.seasonsDirectory",
 										"type": "Expression"
 									},
-									"datasetName": "schedule"
+									"datasetName": "schedule",
+									"time": {
+										"value": "@pipeline().parameters.time",
+										"type": "Expression"
+									}
 								}
 							}
 						},
@@ -59,7 +63,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "03 - Stage Race and Lap Times Dataset",
+									"referenceName": "03 - Stage Race - Lap Times - Pitstop Dataset",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
@@ -72,7 +76,46 @@
 										"value": "@pipeline().parameters.seasonsDirectory",
 										"type": "Expression"
 									},
-									"datasetName": "laps"
+									"datasetName": "laps",
+									"time": {
+										"value": "@pipeline().parameters.time",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "03 - Stage Pitstops Dataset",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "03 - Stage Race Dataset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "03 - Stage Race - Lap Times - Pitstop Dataset",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"seasonsFilename": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"seasonsDirectory": {
+										"value": "@pipeline().parameters.seasonsDirectory",
+										"type": "Expression"
+									},
+									"datasetName": "pitstops",
+									"time": {
+										"value": "@pipeline().parameters.time",
+										"type": "Expression"
+									}
 								}
 							}
 						}

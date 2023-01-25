@@ -1,5 +1,5 @@
 {
-	"name": "03 - Stage Race and Lap Times Dataset",
+	"name": "03 - Stage Race - Lap Times - Pitstop Dataset",
 	"properties": {
 		"activities": [
 			{
@@ -202,6 +202,9 @@
 												}
 											}
 										]
+									},
+									{
+										"value": "pitstops"
 									}
 								]
 							}
