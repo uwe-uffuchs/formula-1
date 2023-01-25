@@ -734,7 +734,7 @@
 							"isSequential": false,
 							"activities": [
 								{
-									"name": "03 - Stage Race Dataset",
+									"name": "Stage Race Dataset",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
 									"userProperties": [],
@@ -762,11 +762,11 @@
 									}
 								},
 								{
-									"name": "03 - Stage Lap Times Dataset",
+									"name": "Stage Lap Times Dataset",
 									"type": "ExecutePipeline",
 									"dependsOn": [
 										{
-											"activity": "03 - Stage Race Dataset",
+											"activity": "Stage Race Dataset",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -797,11 +797,11 @@
 									}
 								},
 								{
-									"name": "03 - Stage Pitstops Dataset",
+									"name": "Stage Pitstops Dataset",
 									"type": "ExecutePipeline",
 									"dependsOn": [
 										{
-											"activity": "03 - Stage Race Dataset",
+											"activity": "Stage Race Dataset",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1518,7 +1518,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "04 - Stage Laps Dataset_copy1",
+											"referenceName": "04 - Stage Laps Dataset",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -1576,7 +1576,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/datalake_file')]",
-				"[concat(variables('factoryId'), '/pipelines/04 - Stage Laps Dataset_copy1')]"
+				"[concat(variables('factoryId'), '/pipelines/04 - Stage Laps Dataset')]"
 			]
 		},
 		{
@@ -1689,7 +1689,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "04 - Stage Pitstop Dataset_copy1",
+											"referenceName": "04 - Stage Pitstop Dataset",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -1747,7 +1747,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/datalake_file')]",
-				"[concat(variables('factoryId'), '/pipelines/04 - Stage Pitstop Dataset_copy1')]"
+				"[concat(variables('factoryId'), '/pipelines/04 - Stage Pitstop Dataset')]"
 			]
 		},
 		{
@@ -1972,7 +1972,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/04 - Stage Laps Dataset_copy1')]",
+			"name": "[concat(parameters('factoryName'), '/04 - Stage Laps Dataset')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1989,7 +1989,7 @@
 							},
 							"activities": [
 								{
-									"name": "01 - Stage Full Datasets",
+									"name": "Stage Full Datasets",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
 									"userProperties": [],
@@ -2049,7 +2049,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/04 - Stage Pitstop Dataset_copy1')]",
+			"name": "[concat(parameters('factoryName'), '/04 - Stage Pitstop Dataset')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -2066,7 +2066,7 @@
 							},
 							"activities": [
 								{
-									"name": "01 - Stage Full Datasets",
+									"name": "Stage Full Datasets",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
 									"userProperties": [],
