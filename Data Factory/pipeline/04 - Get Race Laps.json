@@ -106,7 +106,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "04 - Stage Laps Dataset_copy1",
+									"referenceName": "04 - Stage Laps Dataset",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
