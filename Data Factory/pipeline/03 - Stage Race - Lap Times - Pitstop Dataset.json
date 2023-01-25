@@ -197,6 +197,10 @@
 														"year": {
 															"value": "@item().season",
 															"type": "Expression"
+														},
+														"time": {
+															"value": "@pipeline().parameters.time",
+															"type": "Expression"
 														}
 													}
 												}
@@ -204,7 +208,36 @@
 										]
 									},
 									{
-										"value": "pitstops"
+										"value": "pitstops",
+										"activities": [
+											{
+												"name": "04 - Stage Pitstop Dataset",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "04 - Stage Pitstop Dataset",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"seasonsDirectory": {
+															"value": "@pipeline().parameters.seasonsDirectory",
+															"type": "Expression"
+														},
+														"year": {
+															"value": "@item().season",
+															"type": "Expression"
+														},
+														"time": {
+															"value": "@pipeline().parameters.time",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
 									}
 								]
 							}
