@@ -4,8 +4,8 @@ keyVaultScopeName = "formula 1"
 clientId = dbutils.secrets.get(scope = keyVaultScopeName, key = "databricks-app-clientId")
 tenantId = dbutils.secrets.get(scope = keyVaultScopeName, key = "databricks-app-tenantId")
 clientSecret = dbutils.secrets.get(scope = keyVaultScopeName, key = "databricks-app-clientSecret")
-rawContainerName = "raw"
-processedContainerName = "processed"
+containersToMount = "bronze,silver,gold"
+containersToUnmount = "raw,processed"
 
 # COMMAND ----------
 
@@ -19,15 +19,30 @@ configs = {
 
 # COMMAND ----------
 
-def mount_adls(container):
-    if not any(mount.mountPoint == f"/mnt/{storageAccountName}/{container}" for mount in dbutils.fs.mounts()):
-        dbutils.fs.mount(
-            source = f"abfss://{container}@{storageAccountName}.dfs.core.windows.net/",
-            mount_point = f"/mnt/{storageAccountName}/{container}",
-            extra_configs = configs
-        )
+# string containersList = comma seperated list of containers to either mount or unmount
+# bit unmountOrMount = 1 to mount, 0 to unmount
+def mount_logic(containersList,unmountOrMount):
+    if (unmountOrMount <= 1 and unmountOrMount >= 0):
+        if unmountOrMount == 1:
+            for container in containersList.split(","):
+                if not any(mount.mountPoint == f"/mnt/{storageAccountName}/{container}" for mount in dbutils.fs.mounts()):
+                    dbutils.fs.mount(
+                        source = f"abfss://{container}@{storageAccountName}.dfs.core.windows.net/",
+                        mount_point = f"/mnt/{storageAccountName}/{container}",
+                        extra_configs = configs
+                    )
+        else:
+            for container in containersList.split(","):
+                if any(mount.mountPoint == f"/mnt/{storageAccountName}/{container}" for mount in dbutils.fs.mounts()):
+                    dbutils.fs.unmount(f"/mnt/{storageAccountName}/{container}")
+    else:
+        print("Invalid argument")
 
 # COMMAND ----------
 
-mount_adls(rawContainerName)
-mount_adls(processedContainerName)
+mount_logic(containersToMount, 1)
+mount_logic(containersToUnmount, 0)
+
+# COMMAND ----------
+
+display(dbutils.fs.mounts())
