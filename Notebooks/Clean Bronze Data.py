@@ -114,7 +114,7 @@ def renameAddSchema(df: DataFrame, dataset: StringType) -> DataFrame:
 
     if dataset == 'circuits/':
         df = df.withColumnRenamed('MRData*1->CircuitTable*2->Circuits*3->circuitId*4', 'circuitRef') \
-        .withColumnRenamed('MRData*1->CircuitTable*2->Circuits*3->circuitName*4', 'name') \
+        .withColumnRenamed('MRData*1->CircuitTable*2->Circuits*3->circuitName*4', 'circuitName') \
         .withColumnRenamed('MRData*1->CircuitTable*2->Circuits*3->url*4', 'aboutUrl') \
         .withColumnRenamed('MRData*1->CircuitTable*2->Circuits*3->Location*4->country*5', 'country') \
         .withColumnRenamed('MRData*1->CircuitTable*2->Circuits*3->Location*4->locality*5', 'location') \
@@ -123,7 +123,7 @@ def renameAddSchema(df: DataFrame, dataset: StringType) -> DataFrame:
         return df
 
     if dataset == 'schedule/':
-        df = df.withColumnRenamed('MRData*1->RaceTable*2->Races*3->raceName*4', 'name') \
+        df = df.withColumnRenamed('MRData*1->RaceTable*2->Races*3->raceName*4', 'raceName') \
         .withColumnRenamed('MRData*1->RaceTable*2->Races*3->url*4', 'aboutUrl') \
         .withColumnRenamed('MRData*1->RaceTable*2->Races*3->Circuit*4->circuitId*5', 'circuitRef') \
         .withColumn('year', col('MRData*1->RaceTable*2->Races*3->season*4').cast(IntegerType())) \
@@ -145,7 +145,7 @@ def renameAddSchema(df: DataFrame, dataset: StringType) -> DataFrame:
 
     if dataset == 'constructors/':
         df = df.withColumnRenamed('MRData*1->ConstructorTable*2->Constructors*3->constructorId*4', 'constructorRef') \
-        .withColumnRenamed('MRData*1->ConstructorTable*2->Constructors*3->name*4', 'name') \
+        .withColumnRenamed('MRData*1->ConstructorTable*2->Constructors*3->name*4', 'constructorName') \
         .withColumnRenamed('MRData*1->ConstructorTable*2->Constructors*3->url*4', 'aboutUrl') \
         .withColumnRenamed('MRData*1->ConstructorTable*2->Constructors*3->nationality*4', 'nationality')
         return df
@@ -269,11 +269,11 @@ for folder in dbutils.fs.ls(foldersToIngest):
     
     # Flatten the JSON file
     df = flattenJson(df)
+    #display(df.where(col('MRData*1->RaceTable*2->Races*3->date*4') == '2020-12-13'))
     
     # Re-name columns and add schema
-    print(folderName)
+    #print(folderName)
     df = renameAddSchema(df, folderName)
 
     # Write file back to blob
-    # df.write.mode('overwrite').parquet(silverFolder + auckNow.strftime('%Y%m%d_%H%M%d') + '/' + folderName.replace('/', ''))
     df.write.mode('overwrite').parquet(silverFolder + newestFolder + '/' + folderName.replace('/', ''))
