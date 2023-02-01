@@ -10,11 +10,12 @@ import datetime
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import *
 from pyspark.sql.window import Window
-from pyspark.sql.types import IntegerType
+from pyspark.sql.types import IntegerType, StringType
 
 # Specify mount locations
 silverFolder = '/mnt/sadlformula1/silver/'
 goldFolder = '/mnt/sadlformula1/gold/'
+databaseName = 'silver'
 
 # Get list of subfolders in mount locations
 silverSubFolders = dbutils.fs.ls(silverFolder)
@@ -28,8 +29,24 @@ auckNow = utc_now.astimezone(pytz.timezone('Pacific/Auckland'))
 # Find the subfolder that was last added (i.e., the one with the greatest modification time)
 modificationTime = 0
 for folder in silverSubFolders:
-    if modificationTime < folder.modificationTime:
-        newestFolder = folder.name
+    if folder.name != 'db/':
+        if modificationTime < folder.modificationTime:
+            modificationTime = folder.modificationTime
+            newestFolder = folder.name
+
+spark.conf.set('silverFolder', silverFolder)
+spark.conf.set('databaseName', databaseName)
+spark.conf.set('newestFolder', newestFolder)
+        
+# Get list of files to ingest
+foldersToIngest = silverFolder + newestFolder
+        
+def saveToTable(df: DataFrame, tableName: StringType):
+    df.write.mode('overwrite').format('parquet').saveAsTable(f'{databaseName}.{tableName}')
+    
+def readFiles(folder: StringType) -> DataFrame:
+    df = spark.read.parquet(folder)
+    return df
 
 # COMMAND ----------
 
@@ -37,15 +54,37 @@ for folder in silverSubFolders:
 driversdf = spark.read.parquet(silverFolder + newestFolder + '/drivers')
 constructorsdf = spark.read.parquet(silverFolder + newestFolder + '/constructors')
 circuitsdf = spark.read.parquet(silverFolder + newestFolder + '/circuits')
-#seasonsdf = spark.read.parquet(silverFolder + newestFolder + '/seasons')
-#scheduledf = spark.read.parquet(silverFolder + newestFolder + '/schedule')
-#qualifyingdf = spark.read.parquet(silverFolder + newestFolder + '/qualifying')
-#statusdf = spark.read.parquet(silverFolder + newestFolder + '/status')
+seasonsdf = spark.read.parquet(silverFolder + newestFolder + '/seasons')
+scheduledf = spark.read.parquet(silverFolder + newestFolder + '/schedule')
+qualifyingdf = spark.read.parquet(silverFolder + newestFolder + '/qualifying')
+statusdf = spark.read.parquet(silverFolder + newestFolder + '/status')
 resultsdf = spark.read.parquet(silverFolder + newestFolder + '/results')
 pitstopsdf = spark.read.parquet(silverFolder + newestFolder + '/pitstops')
-#lapsdf = spark.read.parquet(silverFolder + newestFolder + '/laps')
-#constructorStandingsdf = spark.read.parquet(silverFolder + newestFolder + '/constructorStandings')
-#driverStandingsdf = spark.read.parquet(silverFolder + newestFolder + '/driverStandings')
+lapsdf = spark.read.parquet(silverFolder + newestFolder + '/laps')
+constructorStandingsdf = spark.read.parquet(silverFolder + newestFolder + '/constructorStandings')
+driverStandingsdf = spark.read.parquet(silverFolder + newestFolder + '/driverStandings')
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC -- Create database
+# MAGIC CREATE DATABASE IF NOT EXISTS silver
+# MAGIC LOCATION '/mnt/sadlformula1/silver/db/dataAnalysis';
+
+# COMMAND ----------
+
+# Save datasets to new db
+
+# Loop through files in the latest silver import
+for folder in dbutils.fs.ls(foldersToIngest):
+    folderName = folder.name
+    folderPath = folder.path
+    
+    # Read the files in the folder
+    df = readFiles(folderPath)
+    
+    # Save as table
+    saveToTable(df, folderName.replace('/', ''))
 
 # COMMAND ----------
 

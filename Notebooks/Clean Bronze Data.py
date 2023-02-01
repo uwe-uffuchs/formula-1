@@ -31,6 +31,7 @@ auckNow = utc_now.astimezone(pytz.timezone('Pacific/Auckland'))
 modificationTime = 0
 for folder in bronzeSubFolders:
     if modificationTime < folder.modificationTime:
+        modificationTime = folder.modificationTime
         newestFolder = folder.name
         
 # Get list of files to ingest
