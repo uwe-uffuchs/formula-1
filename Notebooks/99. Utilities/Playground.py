@@ -61,4 +61,5 @@ for files in dbutils.fs.ls('/databricks-datasets/COVID'):
 
 # COMMAND ----------
 
-
+# MAGIC %sql
+# MAGIC DROP DATABASE IF EXISTS silver CASCADE;

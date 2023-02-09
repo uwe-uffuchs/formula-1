@@ -4,7 +4,7 @@ keyVaultScopeName = "formula 1"
 clientId = dbutils.secrets.get(scope = keyVaultScopeName, key = "databricks-app-clientId")
 tenantId = dbutils.secrets.get(scope = keyVaultScopeName, key = "databricks-app-tenantId")
 clientSecret = dbutils.secrets.get(scope = keyVaultScopeName, key = "databricks-app-clientSecret")
-containersToMount = "bronze,silver,gold"
+containersToMount = "bronze,silver,gold,config"
 containersToUnmount = "raw,processed"
 
 # COMMAND ----------
